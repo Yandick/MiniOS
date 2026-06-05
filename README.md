@@ -6,7 +6,7 @@ MiniOS 是一个基于 **C11 + Linux/POSIX** 的用户态操作系统模拟平�
 
 ## Preview
 
-![MiniOS homepage screenshot placeholder](demo/assets/readme-hero-placeholder.svg)
+![MiniOS homepage screenshot placeholder](demo\assets\main_page.png)
 
 <!--
 Replace the preview image above after capturing the real homepage or Workbench screenshot.
@@ -20,22 +20,29 @@ Recommended screenshot targets:
 - http://127.0.0.1:8001/workbench.html
 -->
 
-## Demo Video
+## Demo Videos
 
-[![MiniOS demo video placeholder](demo/assets/readme-demo-placeholder.svg)](https://github.com/user-attachments/assets/REPLACE_WITH_YOUR_DEMO_VIDEO)
+Example Demo:
+
+[![MiniOS example demo video placeholder](demo/assets/readme-demo-placeholder.svg)](https://github.com/user-attachments/assets/REPLACE_WITH_EXAMPLE_DEMO_VIDEO)
+
+Workbench Demo:
+
+[![MiniOS Workbench demo video placeholder](demo/assets/readme-demo-placeholder.svg)](https://github.com/user-attachments/assets/REPLACE_WITH_WORKBENCH_DEMO_VIDEO)
 
 <!--
-Replace the placeholder link above with the real demo video URL after uploading your video.
+Replace the placeholder links above with the real demo video URLs after uploading your videos.
 
 Recommended GitHub workflow:
 1. Record an .mp4, .mov, or .webm demo video.
 2. Upload it to a GitHub issue, pull request comment, or README edit box.
 3. Copy the generated https://github.com/user-attachments/assets/... URL.
-4. Replace REPLACE_WITH_YOUR_DEMO_VIDEO in the link above.
+4. Replace REPLACE_WITH_EXAMPLE_DEMO_VIDEO and REPLACE_WITH_WORKBENCH_DEMO_VIDEO in the links above.
 
-If you want GitHub to render the video as an inline media attachment, paste the generated URL on its own line below and remove this comment.
+If you want GitHub to render the videos as inline media attachments, paste the generated URLs on their own lines below and remove this comment.
 
-https://github.com/user-attachments/assets/REPLACE_WITH_YOUR_DEMO_VIDEO
+https://github.com/user-attachments/assets/REPLACE_WITH_EXAMPLE_DEMO_VIDEO
+https://github.com/user-attachments/assets/REPLACE_WITH_WORKBENCH_DEMO_VIDEO
 -->
 
 ## Features
@@ -109,17 +116,19 @@ make performance-report  # Export CSV and Markdown analysis reports
 make valgrind            # Run valgrind if installed
 ```
 
-GUI Demo:
+Example Demo:
 
 ```text
+make story-gui
 http://127.0.0.1:8000/
 http://127.0.0.1:8000/minios_story.html
 http://127.0.0.1:8000/minios_story.html?mode=full
 ```
 
-Workbench:
+Workbench Demo:
 
 ```text
+make workbench
 http://127.0.0.1:8001/workbench.html
 ```
 
