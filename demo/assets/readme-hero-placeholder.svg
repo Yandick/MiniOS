@@ -1,0 +1,38 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1440" height="840" viewBox="0 0 1440 840" role="img" aria-labelledby="title desc">
+  <title id="title">MiniOS homepage screenshot placeholder</title>
+  <desc id="desc">A placeholder image for the MiniOS README homepage preview.</desc>
+  <defs>
+    <linearGradient id="page" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#f4f7f8"/>
+      <stop offset="1" stop-color="#dce7ec"/>
+    </linearGradient>
+    <linearGradient id="panel" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#14212b"/>
+      <stop offset="1" stop-color="#203847"/>
+    </linearGradient>
+    <filter id="shadow" x="-10%" y="-10%" width="120%" height="120%">
+      <feDropShadow dx="0" dy="22" stdDeviation="24" flood-color="#0b1218" flood-opacity="0.22"/>
+    </filter>
+  </defs>
+  <rect width="1440" height="840" fill="url(#page)"/>
+  <rect x="96" y="76" width="1248" height="688" rx="18" fill="#ffffff" filter="url(#shadow)"/>
+  <rect x="96" y="76" width="1248" height="74" rx="18" fill="#101820"/>
+  <circle cx="132" cy="113" r="9" fill="#ff6b6b"/>
+  <circle cx="160" cy="113" r="9" fill="#f7c948"/>
+  <circle cx="188" cy="113" r="9" fill="#2ec4b6"/>
+  <text x="236" y="123" font-family="Inter, Segoe UI, Arial, sans-serif" font-size="24" font-weight="700" fill="#f4f7f8">MiniOS Control Center</text>
+  <rect x="130" y="188" width="520" height="100" rx="12" fill="url(#panel)"/>
+  <text x="164" y="232" font-family="Inter, Segoe UI, Arial, sans-serif" font-size="32" font-weight="700" fill="#ffffff">MiniOS Homepage Preview</text>
+  <text x="164" y="266" font-family="Inter, Segoe UI, Arial, sans-serif" font-size="20" fill="#c7d7df">Replace this placeholder with a real GUI screenshot.</text>
+  <rect x="130" y="326" width="270" height="132" rx="10" fill="#e6eef2"/>
+  <rect x="426" y="326" width="270" height="132" rx="10" fill="#e6eef2"/>
+  <rect x="722" y="188" width="486" height="270" rx="12" fill="#edf3f6"/>
+  <rect x="754" y="220" width="422" height="28" rx="6" fill="#9fb7c4"/>
+  <rect x="754" y="270" width="360" height="18" rx="5" fill="#c3d3da"/>
+  <rect x="754" y="306" width="390" height="18" rx="5" fill="#c3d3da"/>
+  <rect x="754" y="342" width="310" height="18" rx="5" fill="#c3d3da"/>
+  <rect x="130" y="504" width="1078" height="198" rx="12" fill="#101820"/>
+  <text x="164" y="552" font-family="JetBrains Mono, Consolas, monospace" font-size="22" fill="#dff5ee">minios:/workspace$ status</text>
+  <text x="164" y="592" font-family="JetBrains Mono, Consolas, monospace" font-size="20" fill="#8fd4c8">scheduler=RR tick=000 pcb=ready tinyfs=mounted vm=LRU</text>
+  <text x="164" y="632" font-family="JetBrains Mono, Consolas, monospace" font-size="20" fill="#8fd4c8">Workbench terminal, TinyFS explorer and kernel sidebar</text>
+</svg>

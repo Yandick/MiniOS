@@ -1,0 +1,166 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>MiniOS Workbench</title>
+  <link rel="stylesheet" href="assets/minios.css">
+  <link rel="stylesheet" href="assets/workbench.css">
+</head>
+<body class="workbench-page">
+  <div class="workbench">
+    <header class="titlebar">
+      <a class="brand" href="./index.html" aria-label="MiniOS Control Center">
+        <span class="mark">OS</span>
+        <span>MiniOS Workspace</span>
+      </a>
+      <div class="titlebar-center">
+        <button type="button" class="command-center" id="openCommandPaletteTop">
+          <span>⌕</span>
+          <strong id="workspacePath">MiniOS /</strong>
+        </button>
+        <span class="status-chip" id="connectionStatus">connecting</span>
+      </div>
+      <div class="titlebar-actions">
+        <a href="./index.html">主页</a>
+        <button type="button" id="restartMiniOS">重启内核</button>
+      </div>
+    </header>
+
+    <aside class="activitybar" aria-label="Workbench sections">
+      <button class="active" type="button" title="Explorer" data-view="explorer">▦</button>
+      <button type="button" title="Command Palette" data-view="commands">⌕</button>
+      <button type="button" title="Terminal" data-view="terminal">&gt;_</button>
+      <button type="button" title="OS State" data-view="kernel">◎</button>
+    </aside>
+
+    <aside class="explorer">
+      <div class="pane-head">
+        <span>Explorer</span>
+        <button type="button" id="refreshTree" title="Refresh TinyFS tree">↻</button>
+      </div>
+      <div class="tree-panel" id="fileTree" tabindex="0">
+        <div class="folder open">/</div>
+      </div>
+
+      <div class="pane-head compact">
+        <span>TinyFS</span>
+      </div>
+      <pre class="mini-output" id="treeSummary">Directory table:
+  [DIR]  /</pre>
+    </aside>
+
+    <main class="workspace" id="workspace">
+      <nav class="tabs" id="tabs" aria-label="Open files"></nav>
+      <div class="editor-head">
+        <span id="activePath">/home/project/main.c</span>
+        <div class="editor-actions">
+          <span id="editorState">clean</span>
+          <button type="button" id="saveFile">保存</button>
+          <button type="button" id="copyPath">路径</button>
+        </div>
+      </div>
+      <div class="editor-shell">
+        <pre id="lineNumbers" aria-hidden="true">1</pre>
+        <textarea id="editor" spellcheck="false" aria-label="Editor"></textarea>
+      </div>
+      <div class="terminal-resizer" id="terminalResizer" aria-hidden="true"></div>
+      <section class="terminal-pane">
+        <div class="terminal-head">
+          <div class="panel-tabs" aria-label="Panel tabs">
+            <button type="button">PROBLEMS</button>
+            <button type="button">OUTPUT</button>
+            <button class="active" type="button">TERMINAL</button>
+          </div>
+          <div class="terminal-tools">
+            <button type="button" id="openCommandPalette" title="Command Palette">⌘P</button>
+            <button type="button" id="clearTerminal" title="Clear Terminal">Clear</button>
+            <button type="button" id="toggleTerminalMax" title="Maximize Panel">Max</button>
+          </div>
+        </div>
+        <div class="terminal-screen" id="terminalScreen">
+          <pre id="terminalOutput"></pre>
+          <form class="terminal-input" id="terminalForm">
+            <span id="promptLabel">minios:000$</span>
+            <input id="commandInput" autocomplete="off" spellcheck="false" aria-label="MiniOS command">
+          </form>
+        </div>
+      </section>
+    </main>
+
+    <aside class="inspector">
+      <div class="pane-head">
+        <span>OS State</span>
+      </div>
+      <section class="summary-grid">
+        <div class="summary">
+          <span>PID</span>
+          <strong id="kernelPid">-</strong>
+        </div>
+        <div class="summary">
+          <span>Tick</span>
+          <strong id="kernelTick">000</strong>
+        </div>
+        <div class="summary">
+          <span>Scheduler</span>
+          <strong id="kernelScheduler">RR</strong>
+        </div>
+        <div class="summary">
+          <span>Started</span>
+          <strong id="kernelStarted">-</strong>
+        </div>
+      </section>
+
+      <section class="kernel-card modules-card">
+        <h2>Modules</h2>
+        <div class="module-actions" id="moduleActions">
+          <button type="button" data-filter="Files">TinyFS</button>
+          <button type="button" data-filter="FD">FD</button>
+          <button type="button" data-filter="Process">PCB</button>
+          <button type="button" data-filter="Scheduler">Sched</button>
+          <button type="button" data-filter="Memory">Memory</button>
+          <button type="button" data-filter="VM">VM</button>
+          <button type="button" data-filter="Sync">Sync</button>
+          <button type="button" data-filter="Realtime">RT</button>
+          <button type="button" data-filter="Analysis">State</button>
+        </div>
+      </section>
+
+      <section class="kernel-card">
+        <h2>Status</h2>
+        <pre id="statusSummary">Kernel state pending.</pre>
+      </section>
+      <section class="kernel-card">
+        <h2>VM</h2>
+        <pre id="vmSummary">online policy=LRU frames=3</pre>
+      </section>
+      <section class="kernel-card">
+        <h2>FD Table</h2>
+        <pre id="fdSummary">no open fd</pre>
+      </section>
+      <section class="kernel-card grow">
+        <h2>dmesg</h2>
+        <pre id="dmesgSummary">waiting for kernel log</pre>
+      </section>
+    </aside>
+  </div>
+  <footer class="statusbar">
+    <span id="statusCwd">MiniOS /</span>
+    <span id="statusScheduler">RR</span>
+    <span id="statusTick">tick 000</span>
+    <span>Ctrl+P Command Palette</span>
+  </footer>
+  <div class="context-menu" id="contextMenu" hidden></div>
+  <div class="command-palette" id="commandPalette" hidden>
+    <div class="palette-dialog" role="dialog" aria-modal="true" aria-label="MiniOS command palette">
+      <div class="palette-search-row">
+        <input id="commandSearch" autocomplete="off" spellcheck="false" aria-label="Search commands" placeholder="Search commands">
+        <button type="button" id="closeCommandPalette" aria-label="Close command palette">×</button>
+      </div>
+      <div class="palette-scripts" id="scriptList" hidden></div>
+      <div class="palette-list" id="commandList"></div>
+    </div>
+  </div>
+  <script src="assets/workbench.js"></script>
+</body>
+</html>

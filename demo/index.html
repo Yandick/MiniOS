@@ -1,0 +1,283 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>MiniOS Control Center</title>
+  <link rel="stylesheet" href="assets/minios.css">
+</head>
+<body class="home-page">
+  <header class="topbar">
+    <nav class="nav">
+      <a class="brand" href="./index.html" aria-label="MiniOS Control Center">
+        <span class="mark">OS</span>
+        <span>MiniOS Control Center</span>
+      </a>
+      <div class="navlinks">
+        <a href="#modules">模块</a>
+        <a href="#workflow">流程</a>
+        <a href="#evidence">验收</a>
+        <a href="#run">运行</a>
+        <a class="action primary" href="./workbench.html">Workbench</a>
+        <a class="action" href="./minios_story.html?mode=full">完整运行</a>
+      </div>
+    </nav>
+  </header>
+
+  <main>
+    <section class="hero">
+      <div class="hero-copy">
+        <h1>MiniOS 微型操作系统模拟平台</h1>
+        <p class="lead">MiniOS 是一个 C11/POSIX 用户态 MiniKernel。系统在同一运行环境中维护 PCB、tick 调度、首次适应内存、在线 VM frame table、TinyFS、fd 表、同步场景、实时调度和状态测试；Shell、Workbench 与可视化轨迹共同呈现系统运行状态。</p>
+        <div class="actions">
+          <a class="action primary" href="./workbench.html">打开 Workbench</a>
+          <a class="action" href="./minios_story.html?mode=full">查看完整运行轨迹</a>
+          <a class="action" href="./minios_story.html">查看轻量运行轨迹</a>
+          <a class="action" href="#run">查看本地命令</a>
+        </div>
+        <div class="stats" aria-label="MiniOS feature counts">
+          <div class="stat"><strong>6</strong><span>核心模块</span></div>
+          <div class="stat"><strong>5</strong><span>调度策略</span></div>
+          <div class="stat"><strong>3</strong><span>同步场景</span></div>
+          <div class="stat"><strong>1</strong><span>统一 Shell</span></div>
+        </div>
+      </div>
+
+      <div class="system-preview" aria-label="MiniOS visual system preview">
+        <div class="preview-head">
+          <span>kernel tty0</span>
+          <span class="leds"><i class="led"></i><i class="led"></i><i class="led"></i></span>
+        </div>
+        <div class="preview-grid">
+          <div class="terminal">
+            <span class="prompt">minios&gt;</span> <span class="cmd">status</span><br>
+            <span class="ok">tick=008 scheduler=RR q=2</span><br>
+            PCB table: shell/editor/compiler/logger<br>
+            Memory: used=92 free=36 fragmentation=0<br><br>
+            <span class="prompt">minios&gt;</span> <span class="cmd">sleep 2 3; run 3</span><br>
+            <span class="warn">[tick 005] proc sleep pid=2 until=8</span><br>
+            <span class="ok">[tick 008] irq wake pid=2 -&gt; READY</span><br><br>
+            <span class="prompt">minios&gt;</span> <span class="cmd">sched mlfq 1</span><br>
+            [scheduler] policy=MLFQ levels=3 aging=8<br>
+            [tick 012] sched mlfq demote pid=3 Q0-&gt;Q1<br><br>
+            <span class="prompt">minios&gt;</span> <span class="cmd">tree; vm; fd</span><br>
+            <span class="dim">TinyFS mounted, VM frames online, fd table active</span>
+          </div>
+          <div class="dashboard">
+            <div>
+              <p class="mini-title">Process Table</p>
+              <table class="process-table">
+                <thead><tr><th>PID</th><th>Name</th><th>Q</th><th>State</th></tr></thead>
+                <tbody>
+                  <tr><td>1</td><td>shell</td><td>Q0</td><td><span class="pill ready">READY</span></td></tr>
+                  <tr><td>2</td><td>editor</td><td>Q1</td><td><span class="pill ready">READY</span></td></tr>
+                  <tr><td>3</td><td>compiler</td><td>Q1</td><td><span class="pill run">RUNNING</span></td></tr>
+                  <tr><td>5</td><td>renderer</td><td>-</td><td><span class="pill wait">MEM_WAIT</span></td></tr>
+                </tbody>
+              </table>
+            </div>
+            <div class="memory">
+              <p class="mini-title">Resource Map</p>
+              <div class="bar" title="First-fit memory used"><span class="used"></span></div>
+              <div class="bar" title="VM frame activity"><span class="vm"></span></div>
+              <div class="bar" title="TinyFS block bitmap"><span class="fs"></span></div>
+            </div>
+            <div class="tree">/
+home/
+  project/
+    main.c
+    build.log
+dev/
+  tty0</div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="band" id="modules">
+      <div class="section-head">
+        <h2>系统模块</h2>
+        <p>各模块保留独立算法实现，同时接入 MiniKernel 状态模型；进程、内存、VM、文件系统和日志会随命令执行同步更新。</p>
+      </div>
+      <div class="module-grid">
+        <article class="module accent-green">
+          <div>
+            <h3>处理机调度</h3>
+            <p>FCFS、SJF、Priority、RR、HRRN，以及接入 tick 路径的 MLFQ + aging。</p>
+          </div>
+          <code>src/scheduling.c</code>
+        </article>
+        <article class="module accent-cyan">
+          <div>
+            <h3>内存与 VM</h3>
+            <p>首次适应动态分区、释放合并、MEM_WAIT、FIFO/LRU 页面置换、在线 frame table。</p>
+          </div>
+          <code>src/memory.c</code>
+        </article>
+        <article class="module accent-amber">
+          <div>
+            <h3>TinyFS</h3>
+            <p>目录和文件 CRUD、块位图、镜像保存/加载/校验，以及 fd、offset、mode 语义。</p>
+          </div>
+          <code>src/tinyfs.c</code>
+        </article>
+        <article class="module accent-red">
+          <div>
+            <h3>并发同步</h3>
+            <p>生产者-消费者、读者-写者、哲学家进餐，使用 pthread、mutex、condition 和 semaphore。</p>
+          </div>
+          <code>src/sync_demo.c</code>
+        </article>
+        <article class="module accent-blue">
+          <div>
+            <h3>实时与状态分析</h3>
+            <p>EDF/RMS 实时调度、tracebench 多组状态测试、CSV/Markdown 配置记录和 autotune 策略比较。</p>
+          </div>
+          <code>src/realtime.c</code>
+        </article>
+        <article class="module accent-ink">
+          <div>
+            <h3>MiniKernel</h3>
+            <p>在同一运行环境中维护 PCB、timer tick、BLOCKED/wakeup、dmesg、VM、TinyFS 和 Shell 命令状态。</p>
+          </div>
+          <code>src/kernel.c</code>
+        </article>
+      </div>
+    </section>
+
+    <section class="band" id="workflow">
+      <div class="section-head">
+        <h2>运行流程</h2>
+        <p>完整运行从启动状态开始，按 tick 推进进程调度、内存分配、VM 访问和 TinyFS 操作，并生成可复查的验收记录。</p>
+      </div>
+      <div class="workflow">
+        <div class="step"><strong>1. 启动</strong><span>初始化 PCB、调度器、FF 内存、TinyFS、VM 和 dmesg。</span></div>
+        <div class="step"><strong>2. 负载</strong><span>创建 shell/editor/compiler/logger/renderer，形成 READY、RUNNING、MEM_WAIT 状态。</span></div>
+        <div class="step"><strong>3. 时钟</strong><span>RR、sleep、timer IRQ、MLFQ 降级和 aging 通过 tick 逐步触发。</span></div>
+        <div class="step"><strong>4. 存储</strong><span>通过 TinyFS 和 fd 表写入项目文件、构建日志并验证镜像。</span></div>
+        <div class="step"><strong>5. 验证</strong><span>执行 realtime、sync、tracebench、autotune，并从 dmesg 读取系统事件时间线。</span></div>
+      </div>
+    </section>
+
+    <section class="band" id="evidence">
+      <div class="section-head">
+        <h2>验收结果</h2>
+        <p>本页读取 make evidence 生成的记录，汇总核心测试、调度事件、VM 缺页、文件系统事件和最近 dmesg；未生成记录时会给出准备命令。</p>
+      </div>
+      <div class="evidence-grid">
+        <div class="evidence-panel">
+          <h3>验收概览</h3>
+          <div class="evidence-metrics" id="evidenceMetrics">
+            <div class="evidence-metric"><strong>-</strong><span>待运行</span></div>
+            <div class="evidence-metric"><strong>-</strong><span>待加载</span></div>
+            <div class="evidence-metric"><strong>-</strong><span>待记录</span></div>
+          </div>
+          <div class="evidence-list" id="evidenceList">
+            <div class="evidence-row"><span>准备命令</span><b>make evidence</b></div>
+            <div class="evidence-row"><span>可视化入口</span><b>make story-gui</b></div>
+          </div>
+        </div>
+        <div class="evidence-panel">
+          <h3>最近 dmesg</h3>
+          <pre class="dmesg-live" id="evidenceDmesg">生成验收数据后，这里会显示最近的 MiniOS 内核事件。</pre>
+        </div>
+      </div>
+    </section>
+
+    <section class="band" id="run">
+      <div class="section-head">
+        <h2>本地运行</h2>
+        <p>命令行用于编译、测试和生成验收记录；Workbench 连接本地 MiniOS Shell，浏览器页面读取生成后的系统状态摘要。</p>
+      </div>
+      <div class="commands">
+        <div class="command">
+          <h3>CLI / 运行轨迹</h3>
+          <pre>make clean
+make
+make test
+make evidence
+make story-full</pre>
+        </div>
+        <div class="command">
+          <h3>GUI / Workbench</h3>
+          <pre>make evidence
+make workbench
+
+# then open
+http://127.0.0.1:8001/
+http://127.0.0.1:8001/workbench.html</pre>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <footer>
+    <main>MiniOS 是一个 C11 + POSIX 用户态操作系统模拟平台，提供统一 Shell、可视化运行轨迹和浏览器 Workbench。</main>
+  </footer>
+  <script>
+    const metricEl = document.getElementById('evidenceMetrics');
+    const listEl = document.getElementById('evidenceList');
+    const dmesgEl = document.getElementById('evidenceDmesg');
+
+    function text(value, fallback = '-') {
+      return value === undefined || value === null || value === '' ? fallback : String(value);
+    }
+
+    function html(value, fallback = '-') {
+      return text(value, fallback)
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;')
+        .replace(/'/g, '&#39;');
+    }
+
+    function renderFallbackEvidence() {
+      metricEl.innerHTML = `
+        <div class="evidence-metric"><strong>准备</strong><span>make evidence</span></div>
+        <div class="evidence-metric"><strong>启动</strong><span>make story-gui</span></div>
+        <div class="evidence-metric"><strong>待机</strong><span>等待验收数据</span></div>`;
+      listEl.innerHTML = `
+        <div class="evidence-row"><span>准备验收数据</span><b>make evidence</b></div>
+        <div class="evidence-row"><span>启动可视化</span><b>make story-gui</b></div>
+        <div class="evidence-row"><span>当前状态</span><b>等待运行记录</b></div>`;
+      dmesgEl.textContent = '尚未读取到验收结果。\n先运行 make evidence 准备运行记录，再打开本页面。';
+    }
+
+    function renderEvidence(data) {
+      const status = data.status || {};
+      const events = data.events || {};
+      const autotune = data.autotune || {};
+      const tracebench = data.tracebench || {};
+
+      metricEl.innerHTML = `
+        <div class="evidence-metric"><strong>${html(status.core_tests)}</strong><span>核心测试</span></div>
+        <div class="evidence-metric"><strong>${html(status.final_tick)}</strong><span>最终 Tick</span></div>
+        <div class="evidence-metric"><strong>${html(status.full_demo_commands)}</strong><span>Shell 命令</span></div>
+        <div class="evidence-metric"><strong>${html(events.mlfq_events)}</strong><span>MLFQ 事件</span></div>
+        <div class="evidence-metric"><strong>${html(events.vm_faults)}</strong><span>VM 缺页</span></div>
+        <div class="evidence-metric"><strong>${html(events.fs_events)}</strong><span>FS 事件</span></div>`;
+
+      listEl.innerHTML = `
+        <div class="evidence-row"><span>验收时间</span><b>${html(data.generated_at)}</b></div>
+        <div class="evidence-row"><span>调度推荐</span><b>${html(autotune.scheduler)}</b></div>
+        <div class="evidence-row"><span>VM 推荐</span><b>${html(autotune.vm)}</b></div>
+        <div class="evidence-row"><span>并发推荐</span><b>${html(autotune.concurrency)} ${html(autotune.speedup, '')}</b></div>
+        <div class="evidence-row"><span>Tracebench</span><b>${html(tracebench.vm_summary)}</b></div>
+        <div class="evidence-row"><span>运行规模</span><b>${html(status.full_demo_lines)} 行轨迹 / ${html(status.record_count)} 项记录</b></div>`;
+
+      dmesgEl.textContent = Array.isArray(data.recent_dmesg) && data.recent_dmesg.length > 0
+        ? data.recent_dmesg.join('\n')
+        : '已加载验收结果，但没有最近 dmesg 记录。';
+    }
+
+    fetch('assets/evidence.json', { cache: 'no-store' })
+      .then(response => {
+        if (!response.ok) throw new Error(`HTTP ${response.status}`);
+        return response.json();
+      })
+      .then(renderEvidence)
+      .catch(renderFallbackEvidence);
+  </script>
+</body>
+</html>

@@ -1,0 +1,800 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>MiniOS Story Demo</title>
+  <link rel="stylesheet" href="assets/minios.css">
+</head>
+<body class="story-page">
+  <main class="shell">
+    <section class="hero">
+      <div class="title">
+        <div class="badge">OS</div>
+        <div>
+          <h1>MiniOS 完整闭环演示</h1>
+          <div class="subtitle">围绕同一个 telemetry 应用，串联调度、内存、VM、TinyFS、fd、同步、实时和性能结果。</div>
+          <div class="hero-meta">
+            <span>Persistent Kernel</span>
+            <span>Live PCB</span>
+            <span>验收记录</span>
+            <span id="storySource">演示脚本</span>
+            <span id="storyUpdatedAt">记录时间: 待准备</span>
+          </div>
+        </div>
+      </div>
+      <div class="controls">
+        <a class="home-link" href="./index.html">返回主页</a>
+        <button id="prevBtn">上一步</button>
+        <button class="primary" id="playBtn">播放</button>
+        <button id="nextBtn">下一步</button>
+        <button id="resetBtn">重置</button>
+        <select id="modeSel" title="Demo mode">
+          <option value="lite">Lite</option>
+          <option value="full">Full Demo</option>
+        </select>
+        <select id="speedSel" title="Playback speed">
+          <option value="1">1x 标准</option>
+          <option value="0.65">快速</option>
+          <option value="1.6">慢速</option>
+        </select>
+      </div>
+    </section>
+
+    <section class="terminal">
+      <div class="terminal-bar"><span class="dot"></span><span class="dot"></span><span class="dot"></span><span style="margin-left:8px">minios tty0</span></div>
+      <div class="terminal-screen" id="term"></div>
+    </section>
+
+    <aside class="dashboard">
+      <div>
+        <div class="phase-label" id="phaseLabel">Boot</div>
+        <div class="narration" id="narration">点击播放，开始完整 OS 工作流。</div>
+      </div>
+      <div class="metrics">
+        <div class="metric"><span>Tick</span><strong id="tick">000</strong></div>
+        <div class="metric"><span>Scheduler</span><strong id="sched">RR</strong></div>
+        <div class="metric"><span>Running</span><strong id="running">idle</strong></div>
+      </div>
+      <div class="module-grid" id="moduleGrid"></div>
+      <div class="tables">
+        <div class="metric">
+          <span>Memory</span>
+          <strong id="memoryText">0 / 128</strong>
+          <div class="memory-bar"><div class="memory-fill" id="memoryFill"></div></div>
+        </div>
+        <table>
+          <thead><tr><th>PID</th><th>Name</th><th>Remain</th><th>Mem</th><th>State</th></tr></thead>
+          <tbody id="procRows"></tbody>
+        </table>
+        <div class="evidence-box" id="evidenceBox"><span class="evidence-title">验收记录</span>准备验收数据后展示完整运行轨迹</div>
+        <div class="vm-box" id="vmBox">VM: LRU frames=3 faults=0 hits=0</div>
+        <div class="fd-box" id="fdBox">Open FD table: empty</div>
+        <div class="fs-box" id="fsBox">/</div>
+        <div class="log-box" id="logBox">[tick 000] boot init scheduler=RR quantum=2</div>
+      </div>
+    </aside>
+
+    <section class="timeline" id="timeline"></section>
+  </main>
+
+  <script>
+    const scenarios = {
+      lite: {
+        label: 'Lite',
+        subtitle: '轻量模式快速证明 MiniOS 可以从启动跑到验证和 dmesg。',
+        phases: [
+        [
+                "Boot",
+                "内核初始态"
+        ],
+        [
+                "Launch",
+                "创建负载"
+        ],
+        [
+                "Schedule",
+                "RR 与对比"
+        ],
+        [
+                "VM",
+                "页访问轨迹"
+        ],
+        [
+                "TinyFS",
+                "项目文件"
+        ],
+        [
+                "Reclaim",
+                "唤醒 renderer"
+        ],
+        [
+                "Validate",
+                "快速验证"
+        ],
+        [
+                "Report",
+                "内核日志"
+        ]
+],
+        steps: [
+        {
+                "phase": 0,
+                "cmd": "status",
+                "out": "Kernel tick=0 process_count=0 scheduler=RR quantum=2\nMemory: Total=128 Used=0 Free=128\nTinyFS mounted at /, bitmap free=128/128",
+                "note": "Lite 模式快速证明 MiniOS 会进入同一个持续演化的内核状态。",
+                "tick": 0,
+                "sched": "RR",
+                "running": "idle",
+                "mem": 0,
+                "fs": "/"
+        },
+        {
+                "phase": 1,
+                "cmd": "create shell/editor/compiler/renderer",
+                "out": "pid=1 shell    mem=12 -> READY\npid=2 editor   mem=28 -> READY\npid=3 compiler mem=36 -> READY\npid=4 renderer mem=70 -> MEM_WAIT\nFirst-fit: [0,12)=K1 [12,40)=K2 [40,76)=K3 [76,128)=FREE",
+                "note": "telemetry 应用创建交互、构建和渲染进程；renderer 因连续内存不足进入 MEM_WAIT。",
+                "tick": 0,
+                "mem": 76,
+                "procPatch": {
+                        "1": [
+                                "shell",
+                                6,
+                                12,
+                                "READY"
+                        ],
+                        "2": [
+                                "editor",
+                                7,
+                                28,
+                                "READY"
+                        ],
+                        "3": [
+                                "compiler",
+                                9,
+                                36,
+                                "READY"
+                        ],
+                        "4": [
+                                "renderer",
+                                4,
+                                0,
+                                "MEM_WAIT"
+                        ]
+                }
+        },
+        {
+                "phase": 2,
+                "cmd": "sched rr 2; run 4; sched compare 2",
+                "out": "RR dispatches shell/editor and preempts on quantum expiration.\nLive snapshot compares FCFS / SJF / Priority / HRRN / RR.\nRR has better response; FCFS/SJF have lower waiting for this snapshot.",
+                "note": "调度对比不是静态表格，而是当前 PCB 快照下的实时分析。",
+                "tick": 4,
+                "sched": "RR",
+                "running": "editor",
+                "mem": 76,
+                "procPatch": {
+                        "1": [
+                                "shell",
+                                4,
+                                12,
+                                "READY"
+                        ],
+                        "2": [
+                                "editor",
+                                5,
+                                28,
+                                "RUNNING"
+                        ],
+                        "3": [
+                                "compiler",
+                                9,
+                                36,
+                                "READY"
+                        ],
+                        "4": [
+                                "renderer",
+                                4,
+                                0,
+                                "MEM_WAIT"
+                        ]
+                }
+        },
+        {
+                "phase": 3,
+                "cmd": "access trace; page 3",
+                "out": "Access: P1:0 P2:0 P3:0 P1:0 P2:1 P1:1 P1:0\nFIFO faults=6 hits=1 rate=85.7%.\nLRU keeps the recently reused P1:0 page: faults=5 hits=2 rate=71.4%.",
+                "note": "VM 模块由在线页访问驱动，LRU 相比 FIFO 的缺页率优势可见。",
+                "tick": 4
+        },
+        {
+                "phase": 4,
+                "cmd": "mkdir/touch/write/tree",
+                "out": "TinyFS workspace:\n/home/project/main.c -> int-main-return-0-compile-target=minios\n/home/project/build.log -> build-start-compiled-ok\nBitmap used blocks: 5/32",
+                "note": "应用把源码和构建日志写入 TinyFS，展示目录、文件和位图关系。",
+                "tick": 4,
+                "fs": "/\n└─ home/\n   └─ project/\n      ├─ main.c\n      └─ build.log"
+        },
+        {
+                "phase": 5,
+                "cmd": "sched priority; run 9; status",
+                "out": "compiler completes under priority scheduling.\nmm free pid=3\nmm wake pid=4 mem=70 -> READY\nBlocks: [0,12)=K1 [12,40)=K2 [40,110)=K4 [110,128)=FREE",
+                "note": "内存回收触发 renderer 唤醒，闭合进程与内存管理链路。",
+                "tick": 13,
+                "sched": "PRIORITY",
+                "running": "idle",
+                "mem": 110,
+                "procPatch": {
+                        "3": [
+                                "compiler",
+                                0,
+                                0,
+                                "TERMINATED"
+                        ],
+                        "4": [
+                                "renderer",
+                                4,
+                                70,
+                                "READY"
+                        ]
+                }
+        },
+        {
+                "phase": 6,
+                "cmd": "run 4; realtime; sync pc; tracebench",
+                "out": "renderer completes normally and memory is freed by process exit.\nEDF/RMS complete=100%, deadline_miss=0.\nproducer-consumer deadlock_free=yes.\nbuffer=8 throughput > buffer=1 baseline.",
+                "note": "快速路径覆盖进程结束、实时调度、同步和状态测试。",
+                "tick": 17,
+                "running": "idle",
+                "mem": 40,
+                "procPatch": {
+                        "4": [
+                                "renderer",
+                                0,
+                                0,
+                                "TERMINATED"
+                        ]
+                }
+        },
+        {
+                "phase": 7,
+                "cmd": "dmesg",
+                "out": "[tick 000] boot init scheduler=RR\n[tick 002] sched preempt pid=1 quantum expired\n[tick 004] vm access pid=1 page=0\n[tick 013] mm wake pid=4 mem=70 -> READY\n[tick 017] proc exit pid=4\n[tick 017] mm free pid=4",
+                "note": "dmesg 把 Lite 工作流串成一条可追踪的内核时间线。",
+                "tick": 16
+        }
+]
+      },
+      full: {
+        label: 'Full Demo',
+        subtitle: '完整模式同步终端 Full Demo：MLFQ、autotune、timer IRQ、在线 VM、fd 表、TinyFS、实时、同步、状态测试与 dmesg。',
+        phases: [
+          ['启动', '检查内核'],
+          ['负载', 'PCB + 内存'],
+          ['RR', 'tick 调度'],
+          ['IRQ', '阻塞/唤醒'],
+          ['对比', '调度算法'],
+          ['MLFQ', 'aging 调度'],
+          ['VM', '在线 + 回放'],
+          ['TinyFS + FD', 'CRUD + fd 表'],
+          ['回收', 'Priority + FF'],
+          ['运行', 'renderer 收尾'],
+          ['验证', '实时/同步/状态'],
+          ['调优', 'autotune/报告'],
+          ['报告', 'dmesg 追踪']
+        ],
+        steps: [
+          {
+            phase: 0,
+            cmd: 'help; status; dmesg',
+            out: 'Kernel tick=0 process_count=0 scheduler=RR quantum=2 qleft=0 ctx_switches=0 idle_ticks=0\nPCB table: empty\nVM: policy=LRU frames=3 faults=0 hits=0\nOpen file table: empty\nMemory: Total=128 Used=0 Free=128 External fragmentation=0\nTinyFS: mounted /, bitmap free=128/128\ndmesg: [tick 000] boot init scheduler=RR quantum=2 memory=128 fs_blocks=128 vm=LRU frames=3',
+            note: 'Full Demo 从同一套内核状态开始，包括 VM frame table 和 fd 表。',
+            tick: 0,
+            sched: 'RR',
+            running: 'idle',
+            mem: 0,
+            vm: 'VM: LRU frames=3 faults=0 hits=0\n[0:-] [1:-] [2:-]',
+            fd: 'Open FD table: empty',
+            fs: '/'
+          },
+          {
+            phase: 1,
+            cmd: 'create shell; create editor; create compiler; create logger; create renderer',
+            out: 'pid=1 shell    burst=6 mem=12 prio=2 -> READY\npid=2 editor   burst=7 mem=28 prio=3 -> READY\npid=3 compiler burst=9 mem=36 prio=1 -> READY\npid=4 logger   burst=5 mem=16 prio=1 -> READY\npid=5 renderer burst=4 mem=70 prio=1 -> MEM_WAIT\nFirst-fit blocks: [0,12)=K1 [12,40)=K2 [40,76)=K3 [76,92)=K4 [92,128)=FREE',
+            note: '负载与终端 Full Demo 对齐：四个可运行进程，一个 renderer 等待连续内存。',
+            tick: 0,
+            mem: 92,
+            procPatch: {
+              '1': ['shell', 6, 12, 'READY'],
+              '2': ['editor', 7, 28, 'READY'],
+              '3': ['compiler', 9, 36, 'READY'],
+              '4': ['logger', 5, 16, 'READY'],
+              '5': ['renderer', 4, 0, 'MEM_WAIT']
+            }
+          },
+          {
+            phase: 2,
+            cmd: 'sched rr 2; run 5; status',
+            out: '[tick 001] dispatch shell\n[tick 002] shell quantum expired -> READY\n[tick 003] dispatch editor\n[tick 004] editor quantum expired -> READY\n[tick 005] dispatch compiler, compiler remaining=8\nPCB statistics now include CPU time, wait time, and context switches.',
+            note: 'RR 阶段展示 dispatch、时间片抢占和 PCB 实时变化。',
+            tick: 5,
+            sched: 'RR',
+            running: 'compiler',
+            mem: 92,
+            procPatch: {
+              '1': ['shell', 4, 12, 'READY'],
+              '2': ['editor', 5, 28, 'READY'],
+              '3': ['compiler', 8, 36, 'RUNNING'],
+              '4': ['logger', 5, 16, 'READY'],
+              '5': ['renderer', 4, 0, 'MEM_WAIT']
+            }
+          },
+          {
+            phase: 3,
+            cmd: 'sleep 2 3; run 3; status',
+            out: '[tick 005] proc sleep pid=2 until_tick=8\n[tick 006] compiler remaining=7 and quantum expires\n[tick 007] dispatch logger\n[tick 008] irq wake pid=2 -> READY\nstatus: ctx_switches=4, idle_ticks=0, editor returns from BLOCKED to READY.',
+            note: 'timer IRQ 驱动 BLOCKED -> READY，GUI 与终端 Phase 3.5 同步。',
+            tick: 8,
+            sched: 'RR',
+            running: 'logger',
+            mem: 92,
+            procPatch: {
+              '1': ['shell', 4, 12, 'READY'],
+              '2': ['editor', 5, 28, 'READY'],
+              '3': ['compiler', 7, 36, 'READY'],
+              '4': ['logger', 3, 16, 'RUNNING'],
+              '5': ['renderer', 4, 0, 'MEM_WAIT']
+            }
+          },
+          {
+            phase: 4,
+            cmd: 'sched compare 2; sched sjf; sched; sched rr 2',
+            out: 'Live PCB snapshot scheduling metrics\nALG       AvgTurn  AvgWait  AvgResp  CPU\nFCFS        15.75    10.25    10.25  100%\nSJF         14.25     8.75     8.75  100%\nPriority    15.50    10.00    10.00  100%\nHRRN        14.25     8.75     8.75  100%\nRR(q=2)     18.50    13.00     3.00  100%\nPolicy can switch to SJF and back to RR without resetting the kernel.',
+            note: '这里使用 IRQ 后 tick=8 的 PCB 快照，与终端 Full Demo 顺序一致。',
+            tick: 8,
+            sched: 'RR',
+            running: 'idle'
+          },
+          {
+            phase: 5,
+            cmd: 'sched mlfq 1; run 12; status',
+            out: 'MLFQ uses three feedback queues with base quantum=1.\nCPU-bound jobs consume slices and move from Q0 to Q1/Q2.\nREADY jobs that wait for 6 ticks are promoted by aging, for example q1->q0 and q2->q1.\nstatus adds Q, Slice and Age columns so the queue movement is visible in the PCB table.',
+            note: '新增提升点：MLFQ 展示交互响应、CPU 密集任务降级和 aging 防饥饿。',
+            tick: 20,
+            sched: 'MLFQ',
+            running: 'logger',
+            procPatch: {
+              '1': ['shell', 1, 12, 'READY'],
+              '2': ['editor', 2, 28, 'READY'],
+              '3': ['compiler', 4, 36, 'READY'],
+              '4': ['logger', 0, 0, 'TERMINATED']
+            }
+          },
+          {
+            phase: 6,
+            cmd: 'access trace; vm; vm fifo; access 4 2; access 1 0; vm; page 3',
+            out: 'Online LRU after 12 accesses: faults=8 hits=4 fault_rate=66.7%; frames keep P1:0 hot.\nvm fifo resets the online frame table.\nFIFO online after two extra accesses: faults=2 hits=0, frames=[P4:2, P1:0, -].\nOffline page 3 still replays the full access history for FIFO/LRU process tables.',
+            note: 'VM 同时展示在线 frame table 和离线 FIFO/LRU 回放。',
+            tick: 20,
+            vm: 'VM: FIFO frames=3 faults=2 hits=0 rate=14.3%\n[0:P4:2] [1:P1:0] [2:-]'
+          },
+          {
+            phase: 7,
+            cmd: 'TinyFS CRUD; open/writefd/readfd/fd/close; tree',
+            out: 'mkdir /home/project\nmain.c -> int-main-return-0-compile-target=minios\nbuild.log -> build-start-compiled-ok-fd-append\nopen build.log a -> fd=3; writefd 3 -fd-append; close 3\nopen build.log r -> fd=3; readfd 3 -> build-start-compiled-ok-fd-append\nfd table displays fd=3 mode=r offset=33 before close.\ntree -> /home/project with bitmap free=26/32',
+            note: 'GUI 包含与终端一致的 TinyFS CRUD 和 open-file table / fd 工作流。',
+            tick: 20,
+            fd: 'Open FD table snapshot\nFD  Mode  Offset  Path\n3   r     33      /home/project/build.log\n(close 3 -> empty)',
+            fs: '/\n└─ home/\n   └─ project/\n      ├─ main.c\n      └─ build.log'
+          },
+          {
+            phase: 8,
+            cmd: 'sched priority; run 13; status; mem',
+            out: 'Priority scheduling finishes compiler, then FF merge creates a large enough free block.\n[tick 024] proc exit pid=3 -> mm free K3\n[tick 024] mm wake pid=5 mem=70 -> READY\nRenderer, shell and editor then finish; memory returns to a single free block.',
+            note: 'MLFQ 后仍保留内存压力，Priority 阶段继续证明 FF 回收/合并和 MEM_WAIT 唤醒。',
+            tick: 33,
+            sched: 'PRIORITY',
+            running: 'idle',
+            mem: 0,
+            procPatch: {
+              '1': ['shell', 0, 0, 'TERMINATED'],
+              '2': ['editor', 0, 0, 'TERMINATED'],
+              '3': ['compiler', 0, 0, 'TERMINATED'],
+              '4': ['logger', 0, 0, 'TERMINATED'],
+              '5': ['renderer', 0, 0, 'TERMINATED']
+            }
+          },
+          {
+            phase: 9,
+            cmd: 'run 4; mem',
+            out: '[tick 034-037] no runnable process -> cpu idle\nMemory after release: Total=128 Used=0 Free=128\nBlocks: [0,128)=FREE',
+            note: '收尾阶段展示全部作业完成后的 idle tick 和完整内存回收。',
+            tick: 37,
+            running: 'idle',
+            mem: 0,
+            procPatch: {
+              '1': ['shell', 0, 0, 'TERMINATED'],
+              '5': ['renderer', 0, 0, 'TERMINATED']
+            }
+          },
+          {
+            phase: 10,
+            cmd: 'realtime 20; sync all; tracebench',
+            out: 'EDF: jobs=11 complete=100.0% miss=0 CPU=75.0%\nRMS: jobs=11 complete=100.0% miss=0 CPU=75.0%\nproducer-consumer produced=6 consumed=6 deadlock_free=yes\nreaders-writers final_value=4 expected_writes=4\ndining philosophers meals=2,2,2,2,2 deadlock_free=yes\ntracebench: 多组调度/VM/TinyFS 配置输出 tick、PCB、MEM_WAIT、fault 和 fd 指标。',
+            note: '验收阶段覆盖实时调度、三类同步问题和状态测试结果。',
+            tick: 37,
+            sched: 'PRIORITY'
+          },
+          {
+            phase: 11,
+            cmd: 'autotune 16 3; benchcsv build/demo_bench.csv 16 3; perfreport build/demo_performance.md 16 3',
+            out: 'autotune 对 RR q=1/q=2/q=4、Priority、SJF 和 MLFQ q=2 aging 统一评分。\n同时比较 FIFO/LRU 的 frame 配置，以及 producer-consumer buffer=1 与 buffer=8 的吞吐量。\nbenchcsv 导出 CSV 指标，perfreport 生成 Markdown 配置分析。',
+            note: '提升点：从状态指标扩展到自动策略推荐和可提交的配置分析结果。',
+            tick: 37,
+            sched: 'PRIORITY'
+          },
+          {
+            phase: 12,
+            cmd: 'status; dmesg',
+            out: 'Final status: scheduler=PRIORITY, open fd table empty, online VM policy=FIFO frames=[P4:2, P1:0, -], TinyFS project remains, renderer terminated, memory reclaimed.\ndmesg timeline:\nboot -> process create -> MEM_WAIT -> RR preempt -> sleep/wakeup -> sched mlfq demote/aging -> VM hit/fault/evict -> TinyFS fd writes -> priority switch -> mm wake renderer -> renderer exit -> mm free.',
+            note: '最终 dmesg 证明同一条闭环任务，覆盖 MLFQ、IRQ、VM、fd、TinyFS、调度和内存。',
+            tick: 37,
+            vm: 'VM: FIFO frames=3 faults=2 hits=0 rate=14.3%\n[0:P4:2] [1:P1:0] [2:-]',
+            fd: 'Open FD table: empty'
+          }
+        ]
+      }
+    };
+
+    const state = {
+      tick: 0, sched: 'RR', running: 'idle', mem: 0,
+      fs: '/', vm: 'VM: LRU frames=3 faults=0 hits=0\n[0:-] [1:-] [2:-]', fd: 'Open FD table: empty',
+      procs: {},
+      logs: ['[tick 000] boot init scheduler=RR quantum=2 memory=128 fs_blocks=128 vm=LRU frames=3']
+    };
+
+    const term = document.getElementById('term');
+    const playBtn = document.getElementById('playBtn');
+    const prevBtn = document.getElementById('prevBtn');
+    const nextBtn = document.getElementById('nextBtn');
+    const resetBtn = document.getElementById('resetBtn');
+    const speedSel = document.getElementById('speedSel');
+    const modeSel = document.getElementById('modeSel');
+    const subtitleEl = document.querySelector('.subtitle');
+    const storySourceEl = document.getElementById('storySource');
+    const storyUpdatedAtEl = document.getElementById('storyUpdatedAt');
+    const moduleMap = {
+      lite: [
+        ['Boot', 0], ['PCB', 1], ['Sched', 2], ['VM', 3], ['TinyFS', 4],
+        ['Memory', 5], ['RT', 6], ['Sync', 6], ['Bench', 6], ['Trace', 7]
+      ],
+      full: [
+        ['Boot', 0], ['PCB', 1], ['RR', 2], ['IRQ', 3], ['Compare', 4],
+        ['MLFQ', 5], ['VM', 6], ['FD/FS', 7], ['Memory', 8], ['Validate', 10],
+        ['Autotune', 11], ['Trace', 12]
+      ]
+    };
+    const evidenceMap = {
+      lite: [
+        '验收入口: make verify\n运行记录: 默认 tour 完成',
+        'PCB/内存: create + MEM_WAIT\n观测点: 进程创建与内存分配',
+        '调度: sched compare + RR tick\n观测点: 多算法指标与抢占事件',
+        'VM: access trace + page replay\n观测点: FIFO/LRU 缺页率',
+        'TinyFS: mkdir/touch/write/tree\n观测点: 位图与文件表',
+        '回收: mm free -> wake renderer\n观测点: 内存释放后唤醒',
+        '验收: realtime/sync/tracebench\n观测点: 实时、同步、模拟工作负载指标',
+        '轨迹: dmesg timeline\n观测点: 内核事件闭环'
+      ],
+      full: [
+        '验收入口: make verify\n运行记录: Full Demo 闭环完成',
+        'PCB/内存: 5 个进程 + MEM_WAIT\n观测点: 工作负载与内存压力',
+        'RR: dispatch/preempt/context switch\n观测点: 调度事件与上下文切换',
+        'IRQ: sleep 2 3 -> wake_tick=8\n观测点: timer IRQ 唤醒',
+        '调度对比: FCFS/SJF/Priority/HRRN/RR\n观测点: 当前 PCB 快照指标',
+        'MLFQ: queue demotion + aging promotion\n观测点: 降级与 aging 提升',
+        'VM: online frame table + FIFO/LRU replay\n观测点: 缺页率与淘汰过程',
+        'TinyFS/fd: CRUD + open/readfd/writefd\n观测点: 文件表、位图与 fd offset',
+        '内存回收: FF free/merge + renderer wake\n观测点: 合并空闲块并唤醒等待进程',
+        '运行收尾: renderer exit + memory free\n观测点: 进程退出与资源释放',
+        '验收: EDF/RMS + sync all + tracebench\n观测点: 扩展模块和模拟工作负载指标',
+        '调优: autotune + CSV + performance.md\n观测点: 策略推荐和配置分析报告',
+        '轨迹: status + dmesg\n观测点: MiniOS 事件闭环'
+      ]
+    };
+    let playing = false;
+    let stepIndex = 0;
+    let typing = false;
+    let currentMode = new URLSearchParams(location.search).get('mode') === 'full' ? 'full' : 'lite';
+    let generatedFullLoaded = false;
+    let fullStoryGeneratedAt = '';
+
+    function activeScenario() { return scenarios[currentMode]; }
+    function sleep(ms) { return new Promise(r => setTimeout(r, ms * Number(speedSel.value))); }
+    function escapeHtml(value) {
+      return String(value ?? '')
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;')
+        .replace(/'/g, '&#39;');
+    }
+
+    function formatGeneratedAt(value) {
+      if (!value) return '';
+      const date = new Date(value);
+      if (Number.isNaN(date.getTime())) return String(value);
+      const pad = n => String(n).padStart(2, '0');
+      return `${date.getUTCFullYear()}-${pad(date.getUTCMonth() + 1)}-${pad(date.getUTCDate())} ${pad(date.getUTCHours())}:${pad(date.getUTCMinutes())}:${pad(date.getUTCSeconds())} UTC`;
+    }
+
+    function updateStoryMeta() {
+      storySourceEl.textContent = currentMode === 'full'
+        ? (generatedFullLoaded ? '完整轨迹' : '演示脚本')
+        : 'Lite 演示';
+      storyUpdatedAtEl.textContent = generatedFullLoaded
+        ? `记录时间: ${formatGeneratedAt(fullStoryGeneratedAt) || '已加载'}`
+        : '记录时间: 待准备';
+    }
+
+    function renderTimeline(active) {
+      const phases = activeScenario().phases;
+      const progress = phases.length > 0 ? ((active + 1) / phases.length) * 100 : 0;
+      document.getElementById('timeline').innerHTML = `
+        <div class="progress-track"><div class="progress-fill" style="width:${progress}%"></div></div>
+        <div class="phase-grid">
+          ${phases.map((p, i) =>
+            `<button class="phase ${i === active ? 'active' : ''}" type="button" data-phase="${i}"><b>${i + 1}. ${escapeHtml(p[0])}</b><small>${escapeHtml(p[1])}</small></button>`
+          ).join('')}
+        </div>`;
+      document.querySelectorAll('.phase[data-phase]').forEach(btn => {
+        btn.addEventListener('click', () => jumpToPhase(Number(btn.dataset.phase)));
+      });
+    }
+
+    function renderModules(active) {
+      const modules = moduleMap[currentMode];
+      document.getElementById('moduleGrid').innerHTML = modules.map(([label, phase]) => {
+        const cls = phase === active ? 'current' : phase < active ? 'done' : '';
+        return `<div class="module ${cls}">${escapeHtml(label)}</div>`;
+      }).join('');
+    }
+
+    function renderEvidence(active) {
+      const items = evidenceMap[currentMode];
+      const text = items[Math.min(active, items.length - 1)] || items[0];
+      document.getElementById('evidenceBox').innerHTML = `<span class="evidence-title">验收记录</span>${escapeHtml(text)}`;
+    }
+
+    function updateButtons() {
+      prevBtn.disabled = typing || playing || stepIndex <= 1;
+      nextBtn.disabled = typing || playing || stepIndex >= activeScenario().steps.length;
+      resetBtn.disabled = typing;
+      modeSel.disabled = typing || playing;
+    }
+
+    function applyStep(s) {
+      state.tick = s.tick ?? state.tick;
+      state.sched = s.sched ?? state.sched;
+      state.running = s.running ?? state.running;
+      state.mem = s.mem ?? state.mem;
+      state.fs = s.fs ?? state.fs;
+      state.vm = s.vm ?? state.vm;
+      state.fd = s.fd ?? state.fd;
+      if (s.procPatch) Object.entries(s.procPatch).forEach(([pid, row]) => { state.procs[pid] = row; });
+      state.logs.push(`[tick ${String(state.tick).padStart(3,'0')}] ${s.cmd}`);
+      document.getElementById('phaseLabel').textContent = activeScenario().phases[s.phase][0];
+      document.getElementById('narration').textContent = s.note;
+      document.getElementById('tick').textContent = String(state.tick).padStart(3, '0');
+      document.getElementById('sched').textContent = state.sched;
+      document.getElementById('running').textContent = state.running;
+      document.getElementById('memoryText').textContent = `${state.mem} / 128`;
+      document.getElementById('memoryFill').style.width = `${Math.min(100, state.mem / 128 * 100)}%`;
+      document.getElementById('vmBox').textContent = state.vm;
+      document.getElementById('fdBox').textContent = state.fd;
+      document.getElementById('fsBox').textContent = state.fs;
+      document.getElementById('logBox').textContent = state.logs.slice(-5).join('\n');
+      const rows = Object.entries(state.procs).map(([pid, p]) => {
+        const cls = p[3] === 'RUNNING' ? 'state-run' : p[3] === 'MEM_WAIT' ? 'state-wait' : p[3] === 'TERMINATED' ? 'state-term' : 'state-ready';
+        return `<tr><td>${pid}</td><td>${p[0]}</td><td>${p[1]}</td><td>${p[2]}</td><td class="${cls}">${p[3]}</td></tr>`;
+      }).join('');
+      document.getElementById('procRows').innerHTML = rows;
+      renderModules(s.phase);
+      renderTimeline(s.phase);
+      renderEvidence(s.phase);
+      updateButtons();
+    }
+
+    function appendTranscript(s) {
+      const block = document.createElement('div');
+      block.innerHTML = `<span class="prompt">minios:${String(state.tick).padStart(3,'0')}$ </span><span class="cmd"></span><pre class="out"></pre>`;
+      block.querySelector('.cmd').textContent = s.cmd;
+      block.querySelector('.out').textContent = s.out;
+      term.appendChild(block);
+      term.scrollTop = term.scrollHeight;
+    }
+
+    async function typeCommand(cmd) {
+      typing = true;
+      updateButtons();
+      const line = document.createElement('div');
+      line.innerHTML = `<span class="prompt">minios:${String(state.tick).padStart(3,'0')}$ </span><span class="cmd"></span><span class="cursor"></span>`;
+      term.appendChild(line);
+      const cmdEl = line.querySelector('.cmd');
+      for (const ch of cmd) {
+        cmdEl.textContent += ch;
+        term.scrollTop = term.scrollHeight;
+        await sleep(18);
+      }
+      line.querySelector('.cursor').remove();
+      const out = document.createElement('pre');
+      out.className = 'out';
+      line.appendChild(out);
+      typing = false;
+      updateButtons();
+      return out;
+    }
+
+    async function playStep(animated = true) {
+      const steps = activeScenario().steps;
+      if (stepIndex >= steps.length) { playing = false; playBtn.textContent = '重播'; return; }
+      const s = steps[stepIndex++];
+      applyStep(s);
+      if (!animated) {
+        appendTranscript(s);
+        return;
+      }
+      const outEl = await typeCommand(s.cmd);
+      await sleep(180);
+      outEl.textContent = s.out;
+      term.scrollTop = term.scrollHeight;
+      await sleep(currentMode === 'full' ? 1100 : 850);
+    }
+
+    async function advanceOne() {
+      if (typing) return;
+      playing = false;
+      playBtn.textContent = '播放';
+      await playStep(false);
+      if (stepIndex >= activeScenario().steps.length) playBtn.textContent = '重播';
+      updateButtons();
+    }
+
+    function replayTo(targetIndex) {
+      const steps = activeScenario().steps;
+      const index = Math.max(0, Math.min(targetIndex, steps.length - 1));
+      setBaseState();
+      term.innerHTML = '';
+      for (let i = 0; i <= index; i++) {
+        applyStep(steps[i]);
+        appendTranscript(steps[i]);
+      }
+      stepIndex = index + 1;
+      playing = false;
+      playBtn.textContent = stepIndex >= steps.length ? '重播' : '播放';
+      updateButtons();
+    }
+
+    function jumpToPhase(phase) {
+      if (typing) return;
+      playing = false;
+      playBtn.textContent = '播放';
+      const steps = activeScenario().steps;
+      const index = steps.findIndex(s => s.phase === phase);
+      if (index >= 0) replayTo(index);
+    }
+
+    async function loop() {
+      if (typing) return;
+      while (playing && stepIndex < activeScenario().steps.length) await playStep();
+      if (stepIndex >= activeScenario().steps.length) { playing = false; playBtn.textContent = '重播'; }
+      updateButtons();
+    }
+
+    function setBaseState() {
+      Object.assign(state, {
+        tick:0,
+        sched:'RR',
+        running:'idle',
+        mem:0,
+        fs:'/',
+        vm:'VM: LRU frames=3 faults=0 hits=0\n[0:-] [1:-] [2:-]',
+        fd:'Open FD table: empty',
+        logs:['[tick 000] boot init scheduler=RR quantum=2 memory=128 fs_blocks=128 vm=LRU frames=3']
+      });
+      state.procs = {};
+    }
+
+    function reset() {
+      playing = false; stepIndex = 0; term.innerHTML = '';
+      setBaseState();
+      modeSel.value = currentMode;
+      subtitleEl.textContent = activeScenario().subtitle;
+      updateStoryMeta();
+      document.getElementById('phaseLabel').textContent = activeScenario().phases[0][0];
+      document.getElementById('narration').textContent = `点击播放，开始 ${activeScenario().label} 工作流。`;
+      document.getElementById('tick').textContent = '000';
+      document.getElementById('sched').textContent = 'RR';
+      document.getElementById('running').textContent = 'idle';
+      document.getElementById('memoryText').textContent = '0 / 128';
+      document.getElementById('memoryFill').style.width = '0%';
+      document.getElementById('vmBox').textContent = state.vm;
+      document.getElementById('fdBox').textContent = state.fd;
+      document.getElementById('fsBox').textContent = state.fs;
+      document.getElementById('logBox').textContent = state.logs.join('\n');
+      document.getElementById('procRows').innerHTML = '';
+      renderModules(0);
+      renderTimeline(0);
+      renderEvidence(0);
+      term.innerHTML = '';
+      playBtn.textContent = '播放';
+      updateButtons();
+    }
+
+    function isValidGeneratedStory(data) {
+      return data && Array.isArray(data.phases) && Array.isArray(data.steps) &&
+        data.phases.length > 0 && data.steps.length > 0;
+    }
+
+    function applyGeneratedFullStory(data) {
+      if (!isValidGeneratedStory(data)) return false;
+      scenarios.full = {
+        label: data.label || 'Full Demo',
+        subtitle: data.subtitle || '完整模式展示端到端 MiniOS 运行轨迹。',
+        phases: data.phases,
+        steps: data.steps
+      };
+      if (Array.isArray(data.evidence) && data.evidence.length > 0) {
+        evidenceMap.full = data.evidence;
+      }
+      if (Array.isArray(data.modules) && data.modules.length > 0) {
+        moduleMap.full = data.modules;
+      } else {
+        moduleMap.full = data.phases.map((phase, index) => [String(phase[0]).slice(0, 10), index]);
+      }
+      generatedFullLoaded = true;
+      fullStoryGeneratedAt = typeof data.generated_at === 'string' ? data.generated_at : '';
+      return true;
+    }
+
+    async function loadGeneratedFullStory() {
+      try {
+        const response = await fetch('assets/story_full.json', { cache: 'no-store' });
+        if (!response.ok) throw new Error(`HTTP ${response.status}`);
+        const data = await response.json();
+        const applied = applyGeneratedFullStory(data);
+        if (applied && currentMode === 'full') {
+          reset();
+        } else {
+          updateStoryMeta();
+        }
+      } catch (error) {
+        generatedFullLoaded = false;
+        fullStoryGeneratedAt = '';
+        updateStoryMeta();
+      }
+    }
+
+    playBtn.addEventListener('click', () => {
+      if (stepIndex >= activeScenario().steps.length) reset();
+      playing = !playing;
+      playBtn.textContent = playing ? '暂停' : '播放';
+      updateButtons();
+      loop();
+    });
+    prevBtn.addEventListener('click', () => {
+      if (typing) return;
+      replayTo(Math.max(0, stepIndex - 2));
+    });
+    nextBtn.addEventListener('click', advanceOne);
+    resetBtn.addEventListener('click', reset);
+    modeSel.addEventListener('change', () => {
+      currentMode = modeSel.value;
+      const url = new URL(location.href);
+      url.searchParams.set('mode', currentMode);
+      history.replaceState(null, '', url);
+      reset();
+    });
+    reset();
+    loadGeneratedFullStory();
+  </script>
+</body>
+</html>
