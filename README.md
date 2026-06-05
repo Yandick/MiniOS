@@ -6,7 +6,7 @@ MiniOS 是一个基于 **C11 + Linux/POSIX** 的用户态操作系统模拟平�
 
 ## Preview
 
-![MiniOS homepage screenshot placeholder](demo\assets\main_page.png)
+![MiniOS homepage screenshot placeholder](demo/assets/main_page.png)
 
 <!--
 Replace the preview image above after capturing the real homepage or Workbench screenshot.
