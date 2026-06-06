@@ -24,12 +24,11 @@ Recommended screenshot targets:
 
 Example Demo:
 
-[![MiniOS example demo video placeholder](demo/assets/readme-demo-placeholder.svg)](https://github.com/Yandick/MiniOS/releases/tag/demo-v1/demo.mp4)
+https://github.com/user-attachments/assets/5d20784e-9c71-4398-ba99-6edb24ec1cf5
 
 Workbench Demo:
 
-[![MiniOS Workbench demo video placeholder](demo/assets/readme-demo-placeholder.svg)](https://github.com/Yandick/MiniOS/releases/tag/demo-v1/workbench.mp4)
-
+https://github.com/user-attachments/assets/9b2862a0-bd83-43dd-ba59-5a692a7aa64f
 <!--
 Replace the placeholder links above with the real demo video URLs after uploading your videos.
 
