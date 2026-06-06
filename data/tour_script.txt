@@ -1,0 +1,56 @@
+note 1/7 Boot: 查看 MiniOS 命令、调度器、空 PCB、内存和文件系统
+help
+uname
+uptime
+status
+note 2/7 Process/Scheduler: 创建真实 PCB，并切换当前内核调度策略
+create shell 4 12 3
+create compiler 5 32 1
+create backup 3 24 4
+create renderer 2 84 2
+sched rr 2
+status
+run 3
+note 2.5/7 Timer IRQ: 阻塞 compiler 两个 tick，演示 BLOCKED -> READY 唤醒
+sleep 2 2
+run 2
+status
+sched priority
+sched compare 2
+sched mlfq 1
+run 3
+sched priority
+run 4
+note 3/7 VM: 基于当前进程访问历史做 FIFO/LRU，而不是固定页面串
+access 1 7
+access 3 7
+access 1 7
+access 1 3
+access 3 2
+vm
+page 3
+note 4/7 Memory lifecycle: 继续运行，进程结束释放内存，MEM_WAIT 会自动重试
+run 6
+kill 4
+mem
+note 5/7 FileSystem: 在同一个内核状态里创建目录、读写文件、查看块位图
+mkdir /home
+touch /home/readme.txt hello-mini-os
+write /home/readme.txt -kernel-file-service
+cat /home/readme.txt
+open /home/readme.txt a
+writefd 3 -via-fd-table
+fd
+close 3
+cat /home/readme.txt
+ls /home
+tree
+df
+note 6/7 Realtime/Sync/Trace: 提升实验仍在同一个 Shell 里执行
+realtime 20
+sync all
+tracebench
+autotune 8 1
+note 7/7 Dmesg: 查看本次 tour 产生的系统调用、调度、内存、VM、文件事件
+dmesg
+exit

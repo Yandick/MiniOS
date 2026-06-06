@@ -1,0 +1,7 @@
+op,pid,size
+alloc,A,20
+alloc,B,15
+alloc,C,10
+free,B,
+alloc,D,12
+alloc,E,8

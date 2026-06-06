@@ -1,0 +1,43 @@
+note MiniOS Lite Demo: telemetry app 从启动、调度、文件、验证到 dmesg 的快速闭环
+status
+create shell 6 12 2
+create editor 7 28 3
+create compiler 9 36 1
+create renderer 4 70 1
+sched rr 2
+run 4
+sleep 2 2
+run 2
+sched compare 2
+sched mlfq 1
+run 3
+sched rr 2
+access 1 0
+access 2 0
+access 3 0
+access 1 0
+access 2 1
+access 1 1
+access 1 0
+vm
+page 3
+mkdir /home
+mkdir /home/project
+touch /home/project/main.c int-main-return-0
+write /home/project/main.c -compile-target=minios
+touch /home/project/build.log build-start
+write /home/project/build.log -compiled-ok
+open /home/project/build.log a
+writefd 3 -fd-path
+close 3
+tree
+sched priority
+run 9
+status
+run 4
+realtime 20
+sync pc
+tracebench
+autotune 8 1
+dmesg
+exit

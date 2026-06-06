@@ -1,0 +1,10 @@
+op,name,content
+mkdir,/docs,
+create,/readme.txt,hello os
+create,/docs/log.txt,boot
+append,/docs/log.txt, -> ready
+read,/docs/log.txt,
+delete,/readme.txt,
+lsdir,/docs,
+tree,,
+list,,

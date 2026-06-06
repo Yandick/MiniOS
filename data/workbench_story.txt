@@ -1,0 +1,84 @@
+about
+uname
+uptime
+status
+pwd
+ls
+mkdir /workspace
+mkdir /workspace/src
+mkdir /workspace/etc
+mkdir /workspace/logs
+mkdir /workspace/reports
+cd /workspace
+pwd
+ls
+put etc/app.conf scheduler=rr\nquantum=2\nvm=lru\nlog=/workspace/logs/raw.log
+put src/ingest.c read-device-batch\nappend-raw-log\nnotify-parser
+put src/parser.c parse-raw-log\nupdate-metrics\nwrite-release-report
+cat etc/app.conf
+tree
+df
+touch logs/raw.log boot
+open logs/raw.log rw
+writefd 3 \n[0001] device=A temp=37
+writefd 3 \n[0002] device=B temp=41
+seekfd 3 0
+readfd 3 32
+readfd 3 128
+readfd 3
+fd
+close 3
+cat logs/raw.log
+create ingest 7 18 2
+create parser 5 22 1
+create logger 4 12 3
+create metrics 6 24 2
+status
+run 3
+block 2 3
+run 4
+dmesg
+sched
+sched compare
+sched rr 2
+run 4
+sched mlfq 1
+run 4
+status
+create indexer 9 64 2
+create renderer 4 48 2
+status
+mem
+free
+note VM phase: logger、metrics 和 renderer 仍在运行，用它们模拟日志页、指标页和渲染缓存页访问
+vm
+access 3 0
+access 4 0
+access 6 0
+access 3 0
+access 4 1
+vm
+vm fifo
+access 6 1
+access 3 1
+vm
+vm lru
+vm reset
+access 3 0
+access 4 0
+access 3 0
+access 6 0
+page 3
+sync pc
+sync rw
+realtime 30
+tracebench
+autotune 8 2
+benchcsv build/workbench_bench.csv 16 10
+perfreport build/workbench_perf.md 16 10
+put reports/release.md release-ready\nbench=build/workbench_bench.csv\nperf=build/workbench_perf.md
+savefs build/workbench_tinyfs.img
+fscheck build/workbench_tinyfs.img
+dmesg
+status
+tree

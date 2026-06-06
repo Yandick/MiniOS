@@ -475,7 +475,7 @@
     };
     const evidenceMap = {
       lite: [
-        '验收入口: make verify\n运行记录: 默认 tour 完成',
+        '验收入口: make evidence\n运行记录: 默认 tour 完成',
         'PCB/内存: create + MEM_WAIT\n观测点: 进程创建与内存分配',
         '调度: sched compare + RR tick\n观测点: 多算法指标与抢占事件',
         'VM: access trace + page replay\n观测点: FIFO/LRU 缺页率',
@@ -485,7 +485,7 @@
         '轨迹: dmesg timeline\n观测点: 内核事件闭环'
       ],
       full: [
-        '验收入口: make verify\n运行记录: Full Demo 闭环完成',
+        '验收入口: make evidence\n运行记录: Full Demo 闭环完成',
         'PCB/内存: 5 个进程 + MEM_WAIT\n观测点: 工作负载与内存压力',
         'RR: dispatch/preempt/context switch\n观测点: 调度事件与上下文切换',
         'IRQ: sleep 2 3 -> wake_tick=8\n观测点: timer IRQ 唤醒',

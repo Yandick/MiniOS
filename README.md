@@ -1,24 +1,12 @@
 # MiniOS
 
-MiniOS 是一个基于 **C11 + Linux/POSIX** 的用户态操作系统模拟平台。项目将进程管理、处理机调度、内存管理、页面置换、TinyFS 文件系统、进程同步、实时调度和状态分析统一到同一个 MiniOS Shell 中，并提供浏览器 GUI 和 Workbench 作为可视化演示入口。
+MiniOS 是一个基于 **C11 + Linux/POSIX** 的用户态操作系统模拟平台。它不是裸机内核，而是在同一个 MiniOS Shell 中模拟和展示进程管理、处理机调度、内存管理、页面置换、TinyFS 文件系统、文件描述符、进程同步、实时调度和状态分析等核心机制。
 
-它不是可启动的裸机内核，而是一个用于学习、实验和展示操作系统核心机制的完整模拟环境。用户可以在终端或浏览器 Workbench 中创建进程、推进 tick、观察 PCB 和 dmesg、操作 TinyFS、读写 fd、切换调度策略，并生成可复现的测试记录。
+用户可以在终端或浏览器 Workbench 中创建进程、推进 tick、观察 PCB 和 dmesg、操作 TinyFS、读写 fd、切换调度策略，并生成可复查的测试与演示记录。
 
 ## Preview
 
-![MiniOS homepage screenshot placeholder](demo/assets/main_page.png)
-
-<!--
-Replace the preview image above after capturing the real homepage or Workbench screenshot.
-
-Suggested options:
-- Keep the image in this repository, for example: demo/assets/readme-homepage.png
-- Or use a GitHub uploaded image URL, for example: https://github.com/user-attachments/assets/...
-
-Recommended screenshot targets:
-- http://127.0.0.1:8000/
-- http://127.0.0.1:8001/workbench.html
--->
+![MiniOS homepage screenshot](demo/assets/main_page.png)
 
 ## Demo Videos
 
@@ -29,20 +17,6 @@ https://github.com/user-attachments/assets/5d20784e-9c71-4398-ba99-6edb24ec1cf5
 Workbench Demo:
 
 https://github.com/user-attachments/assets/9b2862a0-bd83-43dd-ba59-5a692a7aa64f
-<!--
-Replace the placeholder links above with the real demo video URLs after uploading your videos.
-
-Recommended GitHub workflow:
-1. Record an .mp4, .mov, or .webm demo video.
-2. Upload it to a GitHub issue, pull request comment, or README edit box.
-3. Copy the generated https://github.com/user-attachments/assets/... URL.
-4. Replace REPLACE_WITH_EXAMPLE_DEMO_VIDEO and REPLACE_WITH_WORKBENCH_DEMO_VIDEO in the links above.
-
-If you want GitHub to render the videos as inline media attachments, paste the generated URLs on their own lines below and remove this comment.
-
-https://github.com/user-attachments/assets/REPLACE_WITH_EXAMPLE_DEMO_VIDEO
-https://github.com/user-attachments/assets/REPLACE_WITH_WORKBENCH_DEMO_VIDEO
--->
 
 ## Features
 
@@ -51,26 +25,50 @@ https://github.com/user-attachments/assets/REPLACE_WITH_WORKBENCH_DEMO_VIDEO
 | MiniKernel | PCB table, tick scheduling, process states, BLOCKED/wakeup, MEM_WAIT, context switches, dmesg |
 | Scheduling | FCFS, SJF, Priority, Round Robin, HRRN comparison, MLFQ with aging |
 | Memory | First-fit dynamic partitioning, allocation/free, block merging, fragmentation statistics |
-| Virtual Memory | Online frame table, FIFO/LRU replacement, page access history and fault rate comparison |
+| Virtual Memory | Online frame table, FIFO/LRU replacement, page access history and fault-rate comparison |
 | Synchronization | Producer-consumer, readers-writers, dining philosophers with pthread mutex/semaphore |
 | TinyFS | Directories, files, path operations, free block bitmap, save/load/fscheck image validation |
 | File Descriptors | `open/readfd/writefd/seekfd/close`, offsets, modes, EOF, deleted path with opened fd |
 | Realtime Scheduling | EDF/RMS periodic task simulation, job timeline, deadline miss and utilization |
-| State Analysis | `tracebench`, `benchmark-subset`, `autotune`, CSV export and Markdown performance report |
+| State Analysis | `tracebench`, `benchsubset`, `autotune`, CSV export and Markdown performance report |
 | Web UI | MiniOS Control Center, Full Demo story page, browser Workbench connected to a real MiniOS Shell |
 
 ## Requirements
 
-- Linux 或 WSL
+- Linux/WSL 或 Windows
+- GNU Make；Windows 推荐 MinGW-w64 的 `mingw32-make`
 - `gcc` with C11 support
-- `make`
-- `python3`
+- `python3`；Windows 可使用 `python`
 - POSIX threads support
 - 浏览器，用于主页、Workbench 和 Demo 页
+
+## Build And Verify
+
+Linux/WSL:
+
+```bash
+make all        # 编译 MiniOS Shell
+make test       # 编译并运行核心单元测试
+make evidence   # 生成验收日志、性能报告和浏览器演示资产
+make clean      # 清理 build/
+```
+
+Windows:
+
+```powershell
+mingw32-make all
+mingw32-make test
+mingw32-make evidence
+mingw32-make clean
+```
+
+`make evidence` 或 `mingw32-make evidence` 会写入 `build/evidence/`，并更新 `demo/assets/evidence.json`、`demo/assets/story_full.json` 和 `demo/assets/full_demo_tail.txt`。这些文件是运行结果，不作为源码提交。
 
 ## Start Commands
 
 只保留以下 4 个启动入口：
+
+Linux/WSL:
 
 ```bash
 make home       # 启动本地服务并进入主页
@@ -78,6 +76,8 @@ make workbench  # 启动本地服务并进入 Workbench
 make demo       # 启动本地服务并进入完整闭环 Demo 页
 make tour       # 在本地终端运行默认 tour
 ```
+
+Windows 使用同名目标，将 `make` 替换为 `mingw32-make`。
 
 服务启动后终端会打印对应 URL，例如：
 
@@ -92,7 +92,7 @@ Press Ctrl+C to stop the server.
 - Workbench：`demo/workbench.html`
 - 完整闭环 Demo：`demo/minios_story.html?mode=full`
 
-Workbench 会连接真实的 `build/os_project tour --interactive` 进程。浏览器里的命令会改变同一个 MiniKernel 状态，包括 PCB、tick、内存、VM、TinyFS、fd 表和 dmesg。
+Workbench 会连接真实的 `build/os_project tour --interactive` 进程；Windows 下对应二进制为 `build/os_project.exe`。浏览器里的命令会改变同一个 MiniKernel 状态，包括 PCB、tick、内存、VM、TinyFS、fd 表和 dmesg。
 
 ## MiniOS Shell
 
@@ -120,6 +120,8 @@ readfd | writefd | seekfd | close    文件描述符操作
 fd | fds                             查看打开文件表
 sync [all|pc|rw|dp]                  运行同步实验
 realtime [time]                      运行 EDF/RMS 实时调度实验
+tracebench | benchsubset | autotune  运行状态分析和策略调优
+benchcsv | perfreport                导出 CSV 和 Markdown 报告
 exit | shutdown                      退出 MiniOS
 ```
 
@@ -127,7 +129,8 @@ exit | shutdown                      退出 MiniOS
 
 ```text
 .
-├── include/os_project.h
+├── include/
+│   └── os_project.h
 ├── src/
 │   ├── main.c
 │   ├── kernel.c
@@ -138,16 +141,23 @@ exit | shutdown                      退出 MiniOS
 │   ├── realtime.c
 │   ├── benchmark.c
 │   └── utils.c
-├── tests/test_core.c
+├── tests/
+│   └── test_core.c
 ├── data/
+│   ├── tour_script.txt
+│   ├── os_workflow_demo.txt
+│   ├── os_workflow_full_demo.txt
+│   ├── evidence_*.txt
+│   └── *.csv
 ├── demo/
 │   ├── index.html
 │   ├── workbench.html
-│   └── minios_story.html
+│   ├── minios_story.html
+│   └── assets/
 ├── scripts/
+│   ├── export_demo_assets.py
 │   └── workbench_server.py
-├── docs/
 ├── Makefile
-└── SUBMISSION.md
+└── README.md
 ```
 

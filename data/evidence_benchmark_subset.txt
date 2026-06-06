@@ -1,0 +1,2 @@
+benchsubset 16 3
+exit

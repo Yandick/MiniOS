@@ -1,0 +1,12 @@
+mkdir /qa
+touch /qa/log.txt boot
+open /qa/log.txt a
+writefd 3 -fd
+close 3
+open /qa/log.txt r
+readfd 3
+fd
+close 3
+savefs build/evidence/tinyfs.img
+fscheck build/evidence/tinyfs.img
+exit

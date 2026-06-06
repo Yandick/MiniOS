@@ -1,0 +1,94 @@
+note MiniOS Full Demo: telemetry app 交付全流程，覆盖 MLFQ、自适应调优、调度、内存、VM、TinyFS、实时、同步、性能与 dmesg
+note Phase 1/12 Boot: 开机后确认内核、调度器、PCB、内存和 TinyFS 初始状态
+help
+uname
+uptime
+status
+dmesg
+note Phase 2/12 Workload: 创建 shell/editor/compiler/logger/renderer，形成真实 PCB 工作负载
+create shell 6 12 2
+create editor 7 28 3
+create compiler 9 36 1
+create logger 5 16 1
+create renderer 4 70 1
+status
+mem
+note Phase 3/12 Interactive RR: 用 RR 时间片保证交互响应，并观察抢占事件
+sched rr 2
+run 5
+note Phase 3.5/12 Blocking IO: editor 发起 I/O 等待，timer IRQ 到期后自动唤醒
+sleep 2 3
+run 3
+status
+note Phase 4/12 Scheduling Compare: 用当前 PCB 快照比较 FCFS/SJF/Priority/RR/HRRN
+sched compare 2
+sched sjf
+sched
+sched rr 2
+note Phase 5/12 MLFQ + Aging: 切换多级反馈队列，展示短时间片降级和等待进程 aging 提升
+sched mlfq 1
+run 12
+status
+note Phase 6/12 Virtual Memory: 当前进程产生页面访问，FIFO/LRU 回放缺页与淘汰过程
+access 1 0
+access 2 0
+access 3 0
+access 1 0
+access 3 1
+access 2 1
+access 1 0
+access 3 0
+access 1 0
+access 2 0
+access 3 1
+access 1 0
+vm
+vm fifo
+access 3 2
+access 1 0
+vm
+page 3
+note Phase 7/12 TinyFS CRUD: 创建项目、写源码/日志、读取、列目录、删除临时文件并展示位图
+mkdir /home
+mkdir /home/project
+touch /home/project/main.c int-main-return-0
+write /home/project/main.c -compile-target=minios
+cat /home/project/main.c
+touch /home/project/build.log build-start
+write /home/project/build.log -compiled-ok
+open /home/project/build.log a
+writefd 3 -fd-append
+close 3
+open /home/project/build.log r
+readfd 3
+fd
+close 3
+mkdir /home/project/tmp
+touch /home/project/tmp/frame.tmp rendered-frame
+ls /home/project/tmp
+rm /home/project/tmp/frame.tmp
+rmdir /home/project/tmp
+ls /home/project
+tree
+df
+note Phase 8/12 Priority + Memory: 切换 priority，让 compiler 完成，释放连续内存并唤醒 renderer
+sched priority
+run 13
+status
+mem
+free
+note Phase 9/12 Runtime Close: renderer 获得内存后运行，发布完成并释放资源
+run 4
+mem
+note Phase 10/12 Extended Modules: 实时调度、同步三大问题、状态测试与配置分析
+realtime 20
+sync all
+tracebench
+note Phase 11/12 Autotune + Report: 自动选择调度/VM/同步配置，并导出 CSV 与 Markdown 配置分析报告
+autotune 16 3
+benchcsv build/demo_bench.csv 16 3
+perfreport build/demo_performance.md 16 3
+note Phase 12/12 Trace: 用 dmesg 回放整个 MiniOS 任务闭环
+status
+dmesg
+exit

@@ -1,0 +1,112 @@
+help
+man files
+man proc
+uname
+uptime
+whoami
+hostname
+about
+overview
+note shell command coverage
+status
+ps
+top
+jobs
+dmesg
+pwd
+echo shell-ready
+create shell 3 8 2
+create worker 4 8 1
+create io 2 8 3
+status
+tick 1
+run 1
+sleep 1 1
+block 2 1
+run 2
+kill 3
+mkdir /qa
+cd /qa
+pwd
+touch /qa/a hello
+touch rel relative
+cat rel
+put rel line1\nline2
+cat rel
+write /qa/a -world
+cat /qa/a
+cd ..
+ls qa
+rm /qa/rel
+open /qa/a rw
+readfd 3 5
+seekfd 3 0
+writefd 3 HELLO
+seekfd 3 0
+readfd 3
+fd
+fds
+rm /qa/a
+seekfd 3 0
+readfd 3
+close 3
+touch /qa/b b
+savefs build/shell_all.img
+fscheck build/shell_all.img
+rm /qa/b
+loadfs build/shell_all.img
+cat /qa/b
+touch /qa/modes base
+open /qa/modes w
+writefd 3 reset
+close 3
+open /qa/modes a
+writefd 3 -append
+close 3
+open /qa/modes r
+readfd 3
+close 3
+open /qa/modes rw
+seekfd 3 0
+readfd 3
+close 3
+ls /qa
+df
+mount
+rm /qa/modes
+tree
+rm /qa/b
+rmdir /qa
+clear
+mem
+free
+sched
+sched compare
+sched demo 2
+sched 2
+sched rr 2
+sched mlfq 1
+sched fcfs
+sched sjf
+sched priority
+create pager 4 8 2
+access 4 0
+vm
+vm fifo
+vm lru
+vm frames 4
+vm reset
+access 4 1
+page 3
+page demo 3
+realtime 10
+sync pc
+sync rw
+sync dp
+sync all
+tracebench
+benchsubset 4 1
+autotune 4 1
+benchcsv build/shell_all_bench.csv 4 1
+perfreport build/shell_all_perf.md 4 1
+shutdown

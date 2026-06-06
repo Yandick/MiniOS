@@ -174,7 +174,7 @@ dev/
           </div>
           <div class="evidence-list" id="evidenceList">
             <div class="evidence-row"><span>准备命令</span><b>make evidence</b></div>
-            <div class="evidence-row"><span>可视化入口</span><b>make story-gui</b></div>
+            <div class="evidence-row"><span>可视化入口</span><b>make demo</b></div>
           </div>
         </div>
         <div class="evidence-panel">
@@ -196,7 +196,7 @@ dev/
 make
 make test
 make evidence
-make story-full</pre>
+make tour</pre>
         </div>
         <div class="command">
           <h3>GUI / Workbench</h3>
@@ -235,11 +235,11 @@ http://127.0.0.1:8001/workbench.html</pre>
     function renderFallbackEvidence() {
       metricEl.innerHTML = `
         <div class="evidence-metric"><strong>准备</strong><span>make evidence</span></div>
-        <div class="evidence-metric"><strong>启动</strong><span>make story-gui</span></div>
+        <div class="evidence-metric"><strong>启动</strong><span>make demo</span></div>
         <div class="evidence-metric"><strong>待机</strong><span>等待验收数据</span></div>`;
       listEl.innerHTML = `
         <div class="evidence-row"><span>准备验收数据</span><b>make evidence</b></div>
-        <div class="evidence-row"><span>启动可视化</span><b>make story-gui</b></div>
+        <div class="evidence-row"><span>启动可视化</span><b>make demo</b></div>
         <div class="evidence-row"><span>当前状态</span><b>等待运行记录</b></div>`;
       dmesgEl.textContent = '尚未读取到验收结果。\n先运行 make evidence 准备运行记录，再打开本页面。';
     }

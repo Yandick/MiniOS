@@ -1,0 +1,102 @@
+help
+man files
+man fd
+man proc
+uname
+uptime
+whoami
+hostname
+about
+overview
+note workbench teacher test sweep
+status
+ps
+top
+jobs
+dmesg
+pwd
+echo workbench-ready
+mkdir /qa
+mkdir /qa/src
+mkdir /qa/logs
+cd /qa
+pwd
+touch src/app.c boot
+put src/app.c init\nrun\nflush
+write src/app.c \nappend
+cat src/app.c
+touch logs/mode.txt base
+open logs/mode.txt w
+writefd 3 reset
+close 3
+open logs/mode.txt a
+writefd 3 -append
+close 3
+open logs/mode.txt r
+readfd 3 32
+readfd 3
+close 3
+open logs/mode.txt rw
+seekfd 3 0
+writefd 3 RW
+seekfd 3 0
+readfd 3
+fd
+fds
+close 3
+savefs build/workbench_check.img
+fscheck build/workbench_check.img
+df
+mount
+rm logs/mode.txt
+loadfs build/workbench_check.img
+cat logs/mode.txt
+tree
+create shell 3 8 2
+create worker 4 8 1
+create io 5 8 3
+block 2 2
+tick 1
+run 3
+sleep 3 1
+run 2
+status
+mem
+free
+sched
+sched demo 2
+sched compare
+sched 2
+sched rr 2
+sched mlfq 1
+sched fcfs
+sched sjf
+sched priority
+create pager 4 8 2
+access 4 0
+access 4 1
+access 4 2
+access 4 0
+vm
+vm fifo
+access 4 3
+vm lru
+vm frames 4
+vm reset
+access 4 1
+access 4 2
+page 3
+page demo 3
+realtime 10
+sync pc
+sync rw
+sync dp
+sync all
+tracebench
+autotune 4 1
+benchcsv build/workbench_check_bench.csv 4 1
+perfreport build/workbench_check_perf.md 4 1
+dmesg
+status
+tree
+shutdown
