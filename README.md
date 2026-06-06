@@ -62,11 +62,11 @@ mingw32-make evidence
 mingw32-make clean
 ```
 
-`make evidence` 或 `mingw32-make evidence` 会写入 `build/evidence/`，并更新 `demo/assets/evidence.json`、`demo/assets/story_full.json` 和 `demo/assets/full_demo_tail.txt`。这些文件是运行结果，不作为源码提交。
+`make evidence` 或 `mingw32-make evidence` 会写入 `build/evidence/`，并更新 `demo/assets/evidence.json`、`demo/assets/story_full.json` 和 `demo/assets/full_demo_tail.txt`。
 
 ## Start Commands
 
-只保留以下 4 个启动入口：
+4 个启动入口：
 
 Linux/WSL:
 
