@@ -24,11 +24,11 @@ Recommended screenshot targets:
 
 Example Demo:
 
-[![MiniOS example demo video placeholder](demo/assets/readme-demo-placeholder.svg)](https://github.com/user-attachments/assets/REPLACE_WITH_EXAMPLE_DEMO_VIDEO)
+[![MiniOS example demo video placeholder](demo/assets/readme-demo-placeholder.svg)](https://github.com/Yandick/MiniOS/releases/tag/demo-v1/demo.mp4)
 
 Workbench Demo:
 
-[![MiniOS Workbench demo video placeholder](demo/assets/readme-demo-placeholder.svg)](https://github.com/user-attachments/assets/REPLACE_WITH_WORKBENCH_DEMO_VIDEO)
+[![MiniOS Workbench demo video placeholder](demo/assets/readme-demo-placeholder.svg)](https://github.com/Yandick/MiniOS/releases/tag/demo-v1/workbench.mp4)
 
 <!--
 Replace the placeholder links above with the real demo video URLs after uploading your videos.
@@ -62,216 +62,93 @@ https://github.com/user-attachments/assets/REPLACE_WITH_WORKBENCH_DEMO_VIDEO
 
 ## Requirements
 
-- Linux or WSL
+- Linux 或 WSL
 - `gcc` with C11 support
 - `make`
 - `python3`
 - POSIX threads support
+- 浏览器，用于主页、Workbench 和 Demo 页
 
-Optional:
+## Start Commands
 
-- `valgrind` for memory checking
-- A modern browser for GUI Demo and Workbench
-
-## Quick Start
-
-Build and run the default tour:
+只保留以下 4 个启动入口：
 
 ```bash
-make
-make run
+make home       # 启动本地服务并进入主页
+make workbench  # 启动本地服务并进入 Workbench
+make demo       # 启动本地服务并进入完整闭环 Demo 页
+make tour       # 在本地终端运行默认 tour
 ```
 
-Enter the interactive MiniOS Shell:
-
-```bash
-./build/os_project
-```
-
-Run the full verification suite:
-
-```bash
-make verify
-```
-
-Expected core test output:
+服务启动后终端会打印对应 URL，例如：
 
 ```text
-core tests passed
+MiniOS URL: http://127.0.0.1:8001/workbench.html
+Press Ctrl+C to stop the server.
 ```
 
-## Main Entry Points
+## Pages
 
-```bash
-make run                 # Run the default MiniOS tour
-make story               # Run the Lite demo
-make story-full          # Run the Full Demo
-make story-full-check    # Validate the Full Demo transcript
-make story-gui           # Start the browser GUI service
-make workbench           # Start the browser Workbench
-make workbench-story     # Run the Workbench long scenario
-make workbench-check     # Run a broad Workbench command sweep
-make tracebench          # Run multi-configuration state analysis
-make performance-report  # Export CSV and Markdown analysis reports
-make valgrind            # Run valgrind if installed
-```
+- 主页：`demo/index.html`
+- Workbench：`demo/workbench.html`
+- 完整闭环 Demo：`demo/minios_story.html?mode=full`
 
-Example Demo:
-
-```text
-make story-gui
-http://127.0.0.1:8000/
-http://127.0.0.1:8000/minios_story.html
-http://127.0.0.1:8000/minios_story.html?mode=full
-```
-
-Workbench Demo:
-
-```text
-make workbench
-http://127.0.0.1:8001/workbench.html
-```
+Workbench 会连接真实的 `build/os_project tour --interactive` 进程。浏览器里的命令会改变同一个 MiniKernel 状态，包括 PCB、tick、内存、VM、TinyFS、fd 表和 dmesg。
 
 ## MiniOS Shell
 
-The Shell is the unified control surface for MiniOS. It supports manual commands, scripted tours, and browser Workbench forwarding.
+本地 tour 和 Workbench 终端都使用同一套 Shell。常用命令包括：
 
 ```text
-help | about | overview              Show help and project overview
-status | ps | top                    Show kernel status, PCB, memory and files
-dmesg                                Show kernel event log
-pwd | cd | ls | tree | clear | echo  Basic Unix-like shell commands
-create <name> <burst> <mem> [prio]   Create a process
-tick [n] | run [n]                   Advance scheduler ticks
-sleep <pid> <ticks>                  Block a process and wake it by timer
-kill <pid>                           Terminate a process and reclaim memory
-sched                                Show current scheduler
+help | about | overview              查看帮助和项目总览
+status | ps | top                    查看内核状态、PCB、内存和文件系统
+dmesg                                查看内核事件日志
+pwd | cd | ls | tree | clear | echo  类 Unix 基础命令
+create <name> <burst> <mem> [prio]   创建进程
+tick [n] | run [n]                   推进调度 tick
+sleep <pid> <ticks>                  阻塞进程并由 timer 唤醒
+kill <pid>                           终止进程并回收内存
 sched rr <q>|mlfq <q>|fcfs|sjf|priority
-sched compare [q]                    Compare scheduling algorithms on current PCB snapshot
-mem                                  Show first-fit memory partitions
-access <pid> <page>                  Record an online VM page access
-vm [fifo|lru|reset|frames n]         Configure online VM
-page [frames]                        Replay FIFO/LRU page replacement on access history
-mkdir | rmdir | touch | put | write  TinyFS directory and file operations
-cat | rm | savefs | loadfs | fscheck TinyFS read/delete/image operations
-open <path> [r|w|a|rw]               Open a TinyFS file
-readfd | writefd | seekfd | close    File descriptor operations
-fd | fds                             Show open-file table
-sync [all|pc|rw|dp]                  Run synchronization experiments
-realtime [time]                      Run EDF/RMS realtime scheduling
-tracebench | bench                   Run MiniOS state analysis workloads
-benchsubset [scale] [iters]          Run teaching subset metrics
-autotune [scale] [iters]             Recommend scheduler/VM/sync settings
-benchcsv <path> [scale] [iters]      Export metrics to CSV
-perfreport <path> [scale] [iters]    Export a Markdown performance report
-exit | shutdown                      Exit MiniOS
+sched compare [q]                    基于当前 PCB 快照比较调度算法
+mem                                  查看 first-fit 内存分区
+access <pid> <page>                  记录在线 VM 页访问
+vm [fifo|lru|reset|frames n]         配置在线 VM
+page [frames]                        回放 FIFO/LRU 页面置换
+mkdir | rmdir | touch | put | write  TinyFS 目录和文件操作
+cat | rm | savefs | loadfs | fscheck TinyFS 读取、删除和镜像操作
+open <path> [r|w|a|rw]               打开 TinyFS 文件
+readfd | writefd | seekfd | close    文件描述符操作
+fd | fds                             查看打开文件表
+sync [all|pc|rw|dp]                  运行同步实验
+realtime [time]                      运行 EDF/RMS 实时调度实验
+exit | shutdown                      退出 MiniOS
 ```
-
-Example:
-
-```bash
-./build/os_project tour --mode lite
-./build/os_project tour --mode full
-printf 'status\nrun 3\ndmesg\nexit\n' | ./build/os_project tour --script -
-```
-
-## Browser Workbench
-
-Workbench turns MiniOS Shell into a browser-based operating environment. It includes:
-
-- TinyFS resource explorer
-- File tabs and editor
-- Integrated terminal
-- Command palette
-- Kernel status sidebar
-- Module shortcuts
-- Tab completion and relative path support
-- Ctrl-S save
-- Right-click file actions
-- `$fd` alias for the most recent fd returned by `open`
-
-The terminal is not a static mock. Commands are forwarded by `scripts/workbench_server.py` to a real `build/os_project tour --interactive` process, so TinyFS, PCB, VM, fd table and dmesg state change as commands are executed.
-
-For a manual recording workflow, see:
-
-```text
-docs/workbench_manual_recording_guide.md
-```
-
-## Verification
-
-`make verify` performs a clean end-to-end verification:
-
-```bash
-make clean
-make test
-make shell-check
-make story-full-check
-make workbench-story-check
-make workbench-check
-make workbench-fd-check
-make evidence
-```
-
-Generated records are written under `build/`, which is ignored by git:
-
-```text
-build/evidence/core_tests.txt
-build/evidence/full_demo.log
-build/evidence/tour_default.log
-build/evidence/tracebench.log
-build/evidence/benchmark_subset.log
-build/evidence/autotune.log
-build/evidence/bench.csv
-build/evidence/performance.md
-build/evidence/tinyfs_fd_smoke.log
-```
-
-`make evidence` also refreshes GUI data in `demo/assets/` and synchronizes the full demo transcript to `log.txt`.
 
 ## Project Layout
 
 ```text
 .
-├── include/os_project.h           # Shared data structures and module APIs
+├── include/os_project.h
 ├── src/
-│   ├── main.c                     # CLI, Shell and tour entry point
-│   ├── kernel.c                   # MiniKernel, PCB, tick scheduling, dmesg
-│   ├── scheduling.c               # FCFS/SJF/Priority/RR/HRRN scheduling
-│   ├── memory.c                   # First-fit memory and FIFO/LRU paging
-│   ├── sync_demo.c                # Synchronization experiments
-│   ├── tinyfs.c                   # TinyFS implementation
-│   ├── realtime.c                 # EDF/RMS realtime scheduling
-│   ├── benchmark.c                # tracebench, autotune and reports
-│   └── utils.c                    # Shared helpers
-├── tests/test_core.c              # Core automated tests
-├── data/                          # Tour scripts and test input data
-├── demo/                          # Browser GUI and Workbench
-├── scripts/                       # GUI asset export and Workbench server
-├── docs/                          # Report, development notes and recording guide
+│   ├── main.c
+│   ├── kernel.c
+│   ├── scheduling.c
+│   ├── memory.c
+│   ├── sync_demo.c
+│   ├── tinyfs.c
+│   ├── realtime.c
+│   ├── benchmark.c
+│   └── utils.c
+├── tests/test_core.c
+├── data/
+├── demo/
+│   ├── index.html
+│   ├── workbench.html
+│   └── minios_story.html
+├── scripts/
+│   └── workbench_server.py
+├── docs/
 ├── Makefile
-├── SUBMISSION.md
-└── README.md
+└── SUBMISSION.md
 ```
 
-## Documentation
-
-- `docs/report.md`: course report source
-- `docs/report_word.html`: Word-friendly report export
-- `docs/development.md`: design notes, validation records and GUI assets
-- `docs/workbench_manual_recording_guide.md`: manual Workbench recording guide
-- `docs/workbench_terminal_scenario.md`: long scenario design notes
-- `SUBMISSION.md`: submission and verification checklist
-
-## Design Notes
-
-- MiniOS is a user-space simulator, not a bootable kernel.
-- Numeric Shell arguments are parsed with `strtol`; invalid explicit input reports usage instead of silently falling back to zero.
-- TinyFS images use a `TFSIMG2` header, payload size and checksum. Loading rejects bad magic, truncation, trailing data, checksum mismatch, invalid metadata, duplicate paths, file-directory name conflicts, block range errors and bitmap inconsistencies.
-- fd allocation starts at 3. The fd table tracks owner, path, mode, offset and opened content, including EOF behavior and continued access after a path is deleted.
-- MLFQ is integrated into `kernel_schedule_tick()`, so queue level changes, aging promotion, waiting time, context switches, MEM_WAIT and dmesg all evolve in the same MiniKernel state.
-- `tracebench`, `benchmark-subset` and `autotune` use fixed MiniOS teaching workloads. They are intended for relative analysis inside this project, not as standard OS performance benchmarks.
-
-## License
-
-No license file is currently included. Add one before publishing if you want to define reuse permissions clearly.
