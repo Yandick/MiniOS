@@ -35,16 +35,16 @@ https://github.com/user-attachments/assets/9b2862a0-bd83-43dd-ba59-5a692a7aa64f
 
 ## Requirements
 
-- Linux/WSL 或 Windows
-- GNU Make；Windows 推荐 MinGW-w64 的 `mingw32-make`
+- Linux 或 macOS（POSIX 环境）
+- GNU Make（通常使用 `make`；如系统中安装为 `gmake`，可用 `gmake` 替代）
 - `gcc` with C11 support
-- `python3`；Windows 可使用 `python`
+- `python3`
 - POSIX threads support
 - 浏览器，用于主页、Workbench 和 Demo 页
 
 ## Build And Verify
 
-Linux/WSL:
+Linux/macOS:
 
 ```bash
 make all        # 编译 MiniOS Shell
@@ -53,22 +53,13 @@ make evidence   # 生成验收日志、性能报告和浏览器演示资产
 make clean      # 清理 build/
 ```
 
-Windows:
-
-```powershell
-mingw32-make all
-mingw32-make test
-mingw32-make evidence
-mingw32-make clean
-```
-
-`make evidence` 或 `mingw32-make evidence` 会写入 `build/evidence/`，并更新 `demo/assets/evidence.json`、`demo/assets/story_full.json` 和 `demo/assets/full_demo_tail.txt`。
+`make evidence` 会写入 `build/evidence/`，并更新 `demo/assets/evidence.json`、`demo/assets/story_full.json` 和 `demo/assets/full_demo_tail.txt`。
 
 ## Start Commands
 
 4 个启动入口：
 
-Linux/WSL:
+Linux/macOS:
 
 ```bash
 make home       # 启动本地服务并进入主页
@@ -76,8 +67,6 @@ make workbench  # 启动本地服务并进入 Workbench
 make demo       # 启动本地服务并进入完整闭环 Demo 页
 make tour       # 在本地终端运行默认 tour
 ```
-
-Windows 使用同名目标，将 `make` 替换为 `mingw32-make`。
 
 服务启动后终端会打印对应 URL，例如：
 
@@ -92,7 +81,7 @@ Press Ctrl+C to stop the server.
 - Workbench：`demo/workbench.html`
 - 完整闭环 Demo：`demo/minios_story.html?mode=full`
 
-Workbench 会连接真实的 `build/os_project tour --interactive` 进程；Windows 下对应二进制为 `build/os_project.exe`。浏览器里的命令会改变同一个 MiniKernel 状态，包括 PCB、tick、内存、VM、TinyFS、fd 表和 dmesg。
+Workbench 会连接真实的 `build/os_project tour --interactive` 进程。浏览器里的命令会改变同一个 MiniKernel 状态，包括 PCB、tick、内存、VM、TinyFS、fd 表和 dmesg。
 
 ## MiniOS Shell
 
@@ -160,4 +149,3 @@ exit | shutdown                      退出 MiniOS
 ├── Makefile
 └── README.md
 ```
-

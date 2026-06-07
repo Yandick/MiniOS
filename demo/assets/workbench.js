@@ -19,8 +19,8 @@ int main(void) {
     content: `# MiniOS Workspace
 
 - Unified Shell: process, memory, VM, TinyFS, fd, sync, realtime, custom performance tests.
-- Current backend: build/os_project[.exe] tour --interactive.
-- Acceptance entry: make evidence or mingw32-make evidence.
+- Current backend: build/os_project tour --interactive.
+- Acceptance entry: make evidence.
 `
   },
   "/home/project/build.log": {
@@ -859,7 +859,7 @@ async function pollState() {
   } catch (error) {
     setConnection(false, "offline");
     if (!els.terminalOutput.dataset.offline) {
-      appendTerminal(`[workbench] backend unavailable: ${error.message}\n[workbench] start it with: make workbench or mingw32-make workbench\n`);
+      appendTerminal(`[workbench] backend unavailable: ${error.message}\n[workbench] start it with: make workbench\n`);
       els.terminalOutput.dataset.offline = "1";
     }
   }

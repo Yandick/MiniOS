@@ -32,12 +32,12 @@ static const int DEFAULT_RT_TASK_COUNT = (int)(sizeof(DEFAULT_RT_TASKS) / sizeof
 static void usage(void) {
     printf("MiniOS 操作系统模拟平台（C语言版）\n");
     printf("用法:\n");
-    printf("  build/os_project[.exe]                     # 进入交互式 MiniOS\n");
-    printf("  build/os_project[.exe] tour                # 同上\n");
-    printf("  build/os_project[.exe] tour --mode lite    # 轻量闭环 demo\n");
-    printf("  build/os_project[.exe] tour --mode full    # 完整 Full Demo\n");
-    printf("  build/os_project[.exe] tour --script data/tour_script.txt\n");
-    printf("  build/os_project[.exe] tour --script data/os_workflow_demo.txt --cinematic\n");
+    printf("  build/os_project                     # 进入交互式 MiniOS\n");
+    printf("  build/os_project tour                # 同上\n");
+    printf("  build/os_project tour --mode lite    # 轻量闭环 demo\n");
+    printf("  build/os_project tour --mode full    # 完整 Full Demo\n");
+    printf("  build/os_project tour --script data/tour_script.txt\n");
+    printf("  build/os_project tour --script data/os_workflow_demo.txt --cinematic\n");
     printf("\n项目已整理为单一 tour 导览/交互模式；调度、内存、同步、文件系统、实时调度和性能实验都在 MiniOS Shell 内执行。\n");
 }
 
@@ -323,7 +323,6 @@ static void print_project_overview(void) {
     printf("    make tour                       # 终端默认系统时间线\n");
     printf("    make demo                       # 浏览器 MiniOS Control Center / Full Demo\n");
     printf("    make evidence                   # 运行核心验证并生成验收记录\n");
-    printf("    Windows 下将 make 替换为 mingw32-make\n");
 }
 
 static int fs_free_blocks_for_shell(const TinyFS *fs) {

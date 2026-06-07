@@ -6,7 +6,6 @@ from __future__ import annotations
 import argparse
 import json
 import mimetypes
-import os
 import queue
 import re
 import shutil
@@ -25,8 +24,7 @@ from urllib.parse import unquote, urlparse
 
 PROJECT_ROOT = Path(__file__).resolve().parents[1]
 DEMO_DIR = PROJECT_ROOT / "demo"
-BINARY_NAME = "os_project.exe" if os.name == "nt" else "os_project"
-BINARY = PROJECT_ROOT / "build" / BINARY_NAME
+BINARY = PROJECT_ROOT / "build" / "os_project"
 MAX_COMMAND_CHARS = 8191
 
 
@@ -144,8 +142,6 @@ class MiniOSSession:
 
     @staticmethod
     def _make_tool() -> str | None:
-        if os.name == "nt":
-            return shutil.which("mingw32-make") or shutil.which("make")
         return shutil.which("make") or shutil.which("gmake")
 
     def _read_output(self, proc: subprocess.Popen[str]) -> None:
